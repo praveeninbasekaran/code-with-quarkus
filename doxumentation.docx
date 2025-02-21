@@ -11,57 +11,61 @@ Project Configuration
 	•	Purpose: Acts as an entry point for GraphQL requests from the UI, performs validations and security checks, and forwards requests to the Process API in REST API format.
 Setup Instructions
 	1	Initialize the Project: Use the Quarkus Maven archetype to create the project: mvn io.quarkus:quarkus-maven-plugin:3.8.1:create \
-	2	    -DprojectGroupId=com.example \
-	3	    -DprojectArtifactId=experience-api \
-	4	    -Dextensions="resteasy-reactive,graphql"
-	5	cd experience-api
-	6	
-	7	Add Dependencies: Update pom.xml to include GraphQL and REST client support:
-	8	    io.quarkus
-	9	    quarkus-smallrye-graphql
-	10	
-	11	
-	12	    io.quarkus
-	13	    quarkus-resteasy-reactive-jackson
-	14	
-	15	
-	16	Configuration: Configure application.properties for REST client and security: quarkus.http.port=8080
-	17	quarkus.resteasy-reactive.path=/graphql
-	18	quarkus.smallrye-graphql.show-runtime-exception-message=true
-	19	
-	20	GraphQL Endpoint Example: import io.smallrye.graphql.api.Query;
-	21	import jakarta.inject.Inject;
-	22	import org.eclipse.microprofile.rest.client.inject.RestClient;
-	23	
-	24	@GraphQLApi
-	25	public class ExperienceResource {
-	26	    @Inject
-	27	    @RestClient
-	28	    ProcessApiClient processApiClient;
-	29	
-	30	    @Query
-	31	    public ExperienceData getExperienceData(String id) {
-	32	        // Validate input
-	33	        if (id == null || id.isEmpty()) {
-	34	            throw new IllegalArgumentException("ID cannot be empty");
-	35	        }
-	36	        // Security check (e.g., JWT token validation) can be added here
-	37	        return processApiClient.fetchData(id);
-	38	    }
-	39	}
-	40	
-	41	REST Client for Process API: import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
-	42	import jakarta.ws.rs.GET;
-	43	import jakarta.ws.rs.Path;
-	44	import jakarta.ws.rs.PathParam;
-	45	
-	46	@RegisterRestClient(configKey = "process-api")
-	47	public interface ProcessApiClient {
-	48	    @GET
-	49	    @Path("/data/{id}")
-	50	    ExperienceData fetchData(@PathParam("id") String id);
-	51	}
-	52	
+    -DprojectGroupId=com.example \
+    -DprojectArtifactId=experience-api \
+    -Dextensions="resteasy-reactive,graphql"
+cd experience-api
+
+	
+	2 Add Dependencies: Update pom.xml to include GraphQL and REST client support:
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-smallrye-graphql</artifactId>
+</dependency>
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-resteasy-reactive-jackson</artifactId>
+</dependency>
+
+	3 Configuration: Configure application.properties for REST client and security: quarkus.http.port=8080
+
+quarkus.http.port=8080
+quarkus.resteasy-reactive.path=/graphql
+quarkus.smallrye-graphql.show-runtime-exception-message=true
+
+	4 GraphQL Endpoint Example:
+
+import io.smallrye.graphql.api.Query;
+import jakarta.inject.Inject;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+
+@GraphQLApi
+public class ExperienceResource {
+    @Inject
+    @RestClient
+    ProcessApiClient processApiClient;
+
+    @Query
+    public ExperienceData getExperienceData(String id) {
+        // Validate input
+        if (id == null || id.isEmpty()) {
+            throw new IllegalArgumentException("ID cannot be empty");
+        }
+        // Security check (e.g., JWT token validation) can be added here
+        return processApiClient.fetchData(id);
+    }
+}
+	5 REST Client for Process API: import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+
+@RegisterRestClient(configKey = "process-api")
+public interface ProcessApiClient {
+    @GET
+    @Path("/data/{id}")
+    ExperienceData fetchData(@PathParam("id") String id);
+}
 
 2. Process API
 	•	Project Name: Process API
