@@ -73,48 +73,47 @@ public interface ProcessApiClient {
 	•	Purpose: Handles requests from Experience API, performs CRUD operations, manages business logic, and interacts with PostgreSQL.
 Setup Instructions
 	1	Initialize the Project: mvn io.quarkus:quarkus-maven-plugin:3.8.1:create \
-	2	    -DprojectGroupId=com.example \
-	3	    -DprojectArtifactId=process-api \
-	4	    -Dextensions="resteasy-reactive-jackson,hibernate-orm-panache,jdbc-postgresql,lombok"
-	5	cd process-api
-	6	
-	7	Add Dependencies: Ensure pom.xml includes:
-	8	    io.quarkus
-	9	    quarkus-hibernate-orm-panache
-	10	
-	11	
-	12	    io.quarkus
-	13	    quarkus-jdbc-postgresql
-	14	
-	15	
-	16	    org.projectlombok
-	17	    lombok
-	18	    1.18.30
-	19	
-	20	
-	21	Configuration: Update application.properties: quarkus.http.port=8081
-	22	quarkus.datasource.db-kind=postgresql
-	23	quarkus.datasource.username=admin
-	24	quarkus.datasource.password=secret
-	25	quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/process_db
-	26	quarkus.hibernate-orm.database.generation=update
-	27	
+    -DprojectGroupId=com.example \
+    -DprojectArtifactId=process-api \
+    -Dextensions="resteasy-reactive-jackson,hibernate-orm-panache,jdbc-postgresql,lombok"
+cd process-api
+	2 Add Dependencies: Ensure pom.xml includes:
+	
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-hibernate-orm-panache</artifactId>
+</dependency>
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-jdbc-postgresql</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.projectlombok</groupId>
+    <artifactId>lombok</artifactId>
+    <version>1.18.30</version>
+</dependency>
 
-Database Configuration
+	3 Configuration: Update application.properties: quarkus.http.port=8081
+quarkus.datasource.db-kind=postgresql
+quarkus.datasource.username=admin
+quarkus.datasource.password=secret
+quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/process_db
+quarkus.hibernate-orm.database.generation=update
+
+4 Database Configuration
 	•	Database: PostgreSQL
 	•	Data Usage: Hybrid (traditional RDBMS tables + JSONB columns)
 	•	Schema Example: CREATE TABLE experiences (
-	•	    id SERIAL PRIMARY KEY,
-	•	    name VARCHAR(255) NOT NULL,
-	•	    metadata JSONB, -- Dynamic, expandable data
-	•	    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-	•	);
-	•	
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    metadata JSONB, -- Dynamic, expandable data
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 JSONB Usage
 	•	Why JSONB? JSONB (Binary JSON) is used for columns like metadata to store dynamic, semi-structured data (e.g., user preferences, configurations).
 	•	Example Insert: INSERT INTO experiences (name, metadata)
-	•	VALUES ('User Experience 1', '{"settings": {"theme": "dark"}, "tags": ["ux", "api"]}');
-	•	
+VALUES ('User Experience 1', '{"settings": {"theme": "dark"}, "tags": ["ux", "api"]}');
 
 Sample CRUD Operations in Process API
 Entity Definition
@@ -193,10 +192,9 @@ public class ProcessResource {
     }
 }
 Querying JSONB
-	•	Example to query metadata for a specific tag: public List findByTag(String tag) {
-	•	    return Experience.find("metadata->'tags' @> ?", "[\"" + tag + "\"]").list();
-	•	}
-	•	
+	•	Example to query metadata for a specific tag: public List<Experience> findByTag(String tag) {
+    return Experience.find("metadata->'tags' @> ?", "[\"" + tag + "\"]").list();
+}
 
 Pros of This Architecture
 	1	Separation of Concerns:
