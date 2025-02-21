@@ -1,0 +1,233 @@
+Below is a structured technical document tailored to your requirements. It outlines how to create the software projects “Experience API” and “Process API” with the specified tech stack, explains the use of JSONB in PostgreSQL for efficient data storage, and includes a sample CRUD operation, along with the pros of the architecture and technologies.
+
+Technical Document: Building Experience API and Process API with JSONB Storage
+Overview
+This document provides a step-by-step guide to creating two microservices—Experience API and Process API—using a modern Java-based tech stack with Quarkus as the framework and PostgreSQL as the database. The architecture leverages JSONB columns in PostgreSQL for hybrid data storage, combining traditional RDBMS structure with flexible, dynamic JSONB fields. Sample CRUD operations, benefits of the architecture, and advantages of using PostgreSQL with JSONB are also included.
+
+Project Configuration
+1. Experience API
+	•	Project Name: Experience API
+	•	Tech Stack: Java 17+, Quarkus, GraphQL
+	•	Purpose: Acts as an entry point for GraphQL requests from the UI, performs validations and security checks, and forwards requests to the Process API in REST API format.
+Setup Instructions
+	1	Initialize the Project: Use the Quarkus Maven archetype to create the project: mvn io.quarkus:quarkus-maven-plugin:3.8.1:create \
+	2	    -DprojectGroupId=com.example \
+	3	    -DprojectArtifactId=experience-api \
+	4	    -Dextensions="resteasy-reactive,graphql"
+	5	cd experience-api
+	6	
+	7	Add Dependencies: Update pom.xml to include GraphQL and REST client support:
+	8	    io.quarkus
+	9	    quarkus-smallrye-graphql
+	10	
+	11	
+	12	    io.quarkus
+	13	    quarkus-resteasy-reactive-jackson
+	14	
+	15	
+	16	Configuration: Configure application.properties for REST client and security: quarkus.http.port=8080
+	17	quarkus.resteasy-reactive.path=/graphql
+	18	quarkus.smallrye-graphql.show-runtime-exception-message=true
+	19	
+	20	GraphQL Endpoint Example: import io.smallrye.graphql.api.Query;
+	21	import jakarta.inject.Inject;
+	22	import org.eclipse.microprofile.rest.client.inject.RestClient;
+	23	
+	24	@GraphQLApi
+	25	public class ExperienceResource {
+	26	    @Inject
+	27	    @RestClient
+	28	    ProcessApiClient processApiClient;
+	29	
+	30	    @Query
+	31	    public ExperienceData getExperienceData(String id) {
+	32	        // Validate input
+	33	        if (id == null || id.isEmpty()) {
+	34	            throw new IllegalArgumentException("ID cannot be empty");
+	35	        }
+	36	        // Security check (e.g., JWT token validation) can be added here
+	37	        return processApiClient.fetchData(id);
+	38	    }
+	39	}
+	40	
+	41	REST Client for Process API: import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+	42	import jakarta.ws.rs.GET;
+	43	import jakarta.ws.rs.Path;
+	44	import jakarta.ws.rs.PathParam;
+	45	
+	46	@RegisterRestClient(configKey = "process-api")
+	47	public interface ProcessApiClient {
+	48	    @GET
+	49	    @Path("/data/{id}")
+	50	    ExperienceData fetchData(@PathParam("id") String id);
+	51	}
+	52	
+
+2. Process API
+	•	Project Name: Process API
+	•	Tech Stack: Java 17+, Quarkus, Panache, REST API, Lombok
+	•	Purpose: Handles requests from Experience API, performs CRUD operations, manages business logic, and interacts with PostgreSQL.
+Setup Instructions
+	1	Initialize the Project: mvn io.quarkus:quarkus-maven-plugin:3.8.1:create \
+	2	    -DprojectGroupId=com.example \
+	3	    -DprojectArtifactId=process-api \
+	4	    -Dextensions="resteasy-reactive-jackson,hibernate-orm-panache,jdbc-postgresql,lombok"
+	5	cd process-api
+	6	
+	7	Add Dependencies: Ensure pom.xml includes:
+	8	    io.quarkus
+	9	    quarkus-hibernate-orm-panache
+	10	
+	11	
+	12	    io.quarkus
+	13	    quarkus-jdbc-postgresql
+	14	
+	15	
+	16	    org.projectlombok
+	17	    lombok
+	18	    1.18.30
+	19	
+	20	
+	21	Configuration: Update application.properties: quarkus.http.port=8081
+	22	quarkus.datasource.db-kind=postgresql
+	23	quarkus.datasource.username=admin
+	24	quarkus.datasource.password=secret
+	25	quarkus.datasource.jdbc.url=jdbc:postgresql://localhost:5432/process_db
+	26	quarkus.hibernate-orm.database.generation=update
+	27	
+
+Database Configuration
+	•	Database: PostgreSQL
+	•	Data Usage: Hybrid (traditional RDBMS tables + JSONB columns)
+	•	Schema Example: CREATE TABLE experiences (
+	•	    id SERIAL PRIMARY KEY,
+	•	    name VARCHAR(255) NOT NULL,
+	•	    metadata JSONB, -- Dynamic, expandable data
+	•	    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	•	);
+	•	
+JSONB Usage
+	•	Why JSONB? JSONB (Binary JSON) is used for columns like metadata to store dynamic, semi-structured data (e.g., user preferences, configurations).
+	•	Example Insert: INSERT INTO experiences (name, metadata)
+	•	VALUES ('User Experience 1', '{"settings": {"theme": "dark"}, "tags": ["ux", "api"]}');
+	•	
+
+Sample CRUD Operations in Process API
+Entity Definition
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import lombok.Data;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.time.LocalDateTime;
+import java.util.Map;
+
+@Entity
+@Data
+public class Experience extends PanacheEntityBase {
+    @Id
+    private Long id;
+    private String name;
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map metadata;
+    private LocalDateTime createdAt;
+}
+REST Resource with CRUD
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import java.util.List;
+
+@Path("/data")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+public class ProcessResource {
+
+    // CREATE
+    @POST
+    @Transactional
+    public Experience createExperience(Experience experience) {
+        experience.persist();
+        return experience;
+    }
+
+    // READ
+    @GET
+    @Path("/{id}")
+    public Experience getExperience(@PathParam("id") Long id) {
+        return Experience.findById(id);
+    }
+
+    // UPDATE
+    @PUT
+    @Path("/{id}")
+    @Transactional
+    public Experience updateExperience(@PathParam("id") Long id, Experience updated) {
+        Experience existing = Experience.findById(id);
+        if (existing != null) {
+            existing.setName(updated.getName());
+            existing.setMetadata(updated.getMetadata());
+            existing.persist();
+        }
+        return existing;
+    }
+
+    // DELETE
+    @DELETE
+    @Path("/{id}")
+    @Transactional
+    public void deleteExperience(@PathParam("id") Long id) {
+        Experience.deleteById(id);
+    }
+
+    // READ ALL
+    @GET
+    public List listExperiences() {
+        return Experience.listAll();
+    }
+}
+Querying JSONB
+	•	Example to query metadata for a specific tag: public List findByTag(String tag) {
+	•	    return Experience.find("metadata->'tags' @> ?", "[\"" + tag + "\"]").list();
+	•	}
+	•	
+
+Pros of This Architecture
+	1	Separation of Concerns:
+	◦	Experience API handles UI-facing GraphQL requests and security, while Process API focuses on business logic and data operations.
+	◦	Enhances maintainability and scalability.
+	2	Microservices with Quarkus:
+	◦	Quarkus provides fast startup times and low memory usage, ideal for cloud-native deployment.
+	◦	Native compilation support reduces resource overhead.
+	3	GraphQL and REST Integration:
+	◦	GraphQL in Experience API allows flexible queries from the UI, while REST in Process API ensures simplicity for internal communication.
+	4	Hybrid Data Model:
+	◦	Combines structured RDBMS for fixed data with JSONB for dynamic, expandable data, offering flexibility without sacrificing integrity.
+
+Pros of Using PostgreSQL
+	1	Robustness and Reliability:
+	◦	ACID compliance ensures data consistency, crucial for business logic in Process API.
+	2	Advanced Features:
+	◦	Supports JSONB, full-text search, and indexing, making it versatile for hybrid data needs.
+	3	Scalability:
+	◦	Handles high data volumes and concurrent connections efficiently.
+	4	Open-Source:
+	◦	Cost-effective with a strong community and extensive documentation.
+
+Pros of Using JSONB Columns
+	1	Dynamic Structure:
+	◦	JSONB allows storing semi-structured data (e.g., user settings, tags) without schema changes.
+	2	Efficient Querying:
+	◦	Supports indexing (e.g., GIN indexes) for fast lookups on JSONB fields: CREATE INDEX idx_metadata ON experiences USING GIN (metadata);
+	◦	
+	3	Scalability for High Data Flow:
+	◦	Ideal for scenarios with variable or evolving data structures, reducing the need for frequent migrations.
+	4	Compact Storage:
+	◦	Binary format reduces storage overhead compared to plain JSON.
+
+Conclusion
+This architecture leverages Quarkus for high-performance microservices, PostgreSQL for reliable data management, and JSONB for flexible storage. The Experience API and Process API together provide a robust, scalable solution for handling UI requests, business logic, and data operations. The sample CRUD operations demonstrate how to interact with JSONB efficiently, making this setup ideal for applications requiring both structure and adaptability.
+
+Let me know if you’d like to expand on any section or refine the sample code further!
