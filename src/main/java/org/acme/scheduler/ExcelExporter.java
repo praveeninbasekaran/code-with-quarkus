@@ -3,7 +3,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.ByteArrayOutputStream;
 import java.util.List;
-import java.util.Map;
 
 public class ExcelExporter {
     public static byte[] exportToExcel(List<RiskDetails> data, List<String> columns) throws Exception {
@@ -75,17 +74,22 @@ public class ExcelExporter {
                 cell.setCellValue(data.validated != null ? data.validated.toString() : "false");
                 break;
             default:
-                // Handle jsonb fields
-                if (data.value != null && data.value.has(column)) {
-                    JsonNode jsonValue = data.value.get(column);
-                    if (jsonValue.isTextual()) {
-                        cell.setCellValue(jsonValue.asText());
-                    } else if (jsonValue.isBoolean()) {
-                        cell.setCellValue(jsonValue.asBoolean());
-                    } else if (jsonValue.isNumber()) {
-                        cell.setCellValue(jsonValue.asDouble());
+                // Handle jsonb fields (parse String value into JsonNode)
+                if (data.value != null) {
+                    com.fasterxml.jackson.databind.JsonNode jsonNode = data.parseValue();
+                    if (jsonNode.has(column)) {
+                        com.fasterxml.jackson.databind.JsonNode jsonValue = jsonNode.get(column);
+                        if (jsonValue.isTextual()) {
+                            cell.setCellValue(jsonValue.asText());
+                        } else if (jsonValue.isBoolean()) {
+                            cell.setCellValue(jsonValue.asBoolean());
+                        } else if (jsonValue.isNumber()) {
+                            cell.setCellValue(jsonValue.asDouble());
+                        } else {
+                            cell.setCellValue(jsonValue.toString());
+                        }
                     } else {
-                        cell.setCellValue(jsonValue.toString());
+                        cell.setCellValue("");
                     }
                 } else {
                     cell.setCellValue("");
