@@ -1,0 +1,115 @@
+{
+  "rule_id": "R-001",
+  "rule_name": "Market Volatility Alert",
+  "rule_number": "R-001",
+  "description": "Monitor sudden market drops",
+  "execution_frequency": "Daily",
+  "due_in_days": 30,
+  "status": "Active",
+  "created_by": "user_123",
+  "created_at": "2024-03-04T10:00:00Z",
+
+  "selected_values": {
+    "risk_types": [
+      {
+        "id": 1,
+        "name": "Market Risk"
+      },
+      {
+        "id": 2,
+        "name": "Credit Risk"
+      }
+    ],
+    "risk_ratings": [
+      {
+        "id": 1,
+        "name": "High"
+      },
+      {
+        "id": 2,
+        "name": "Medium"
+      }
+    ],
+    "risk_factors": [
+      {
+        "id": 3,
+        "name": "Liquidity Risk"
+      },
+      {
+        "id": 4,
+        "name": "Volatility Risk"
+      }
+    ],
+    "countries": [
+      {
+        "id": 5,
+        "name": "USA"
+      },
+      {
+        "id": 6,
+        "name": "UK"
+      }
+    ],
+    "assessment_units": [
+      {
+        "id": 7,
+        "name": "Investment Banking"
+      },
+      {
+        "id": 8,
+        "name": "Retail Banking"
+      }
+    ],
+    "segments": [
+      {
+        "id": 9,
+        "name": "Large Corporations"
+      },
+      {
+        "id": 10,
+        "name": "SME Businesses"
+      }
+    ],
+    "subsegments": [
+      {
+        "id": 11,
+        "name": "Corporate Bonds"
+      },
+      {
+        "id": 12,
+        "name": "Small Business Loans"
+      }
+    ]
+  },
+
+  "workflow": {
+    "stage_1": {
+      "role": "Checker",
+      "expected_risk_response": "Approve or Reject",
+      "assigned_users": ["checker_001", "checker_002"]
+    },
+    "stage_2": {
+      "role": "Compliance Officer",
+      "expected_risk_response": "Escalate or Validate",
+      "assigned_users": ["compliance_001"]
+    },
+    "stage_3": {
+      "role": "Risk Manager",
+      "expected_risk_response": "Execute or Modify",
+      "assigned_users": ["risk_manager_001", "risk_manager_002"]
+    }
+  },
+
+  "notifications": {
+    "notification_type": "Action",
+    "notified_users": [
+      "user_001@example.com",
+      "user_002@example.com"
+    ],
+    "email_template": {
+      "template_id": 1,
+      "template_name": "High-Risk Alert",
+      "template_content": "Dear User, A high-risk rule has been triggered. Please take action."
+    }
+  }
+}
