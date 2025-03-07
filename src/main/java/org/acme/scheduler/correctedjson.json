@@ -1,0 +1,202 @@
+{
+  "risk_types": [
+    {
+      "id": 1,
+      "name": "Market Risk",
+      "ratings": [
+        {
+          "id": 101,
+          "name": "High",
+          "factors": [
+            {
+              "id": 201,
+              "name": "Liquidity Risk",
+              "countries": [
+                {
+                  "id": 301,
+                  "name": "USA",
+                  "assessment_units": [
+                    {
+                      "id": 401,
+                      "name": "Investment Banking",
+                      "segments": [
+                        {
+                          "id": 501,
+                          "name": "Large Corporations",
+                          "subsegments": [
+                            {
+                              "id": 601,
+                              "name": "Corporate Bonds"
+                            },
+                            {
+                              "id": 602,
+                              "name": "Equity Funds"
+                            }
+                          ]
+                        },
+                        {
+                          "id": 502,
+                          "name": "SME Businesses",
+                          "subsegments": [
+                            {
+                              "id": 603,
+                              "name": "Small Business Loans"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": 402,
+                      "name": "Retail Banking",
+                      "segments": [
+                        {
+                          "id": 503,
+                          "name": "Consumer Lending",
+                          "subsegments": [
+                            {
+                              "id": 604,
+                              "name": "Home Loans"
+                            },
+                            {
+                              "id": 605,
+                              "name": "Car Loans"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": 302,
+                  "name": "UK",
+                  "assessment_units": [
+                    {
+                      "id": 403,
+                      "name": "Wealth Management",
+                      "segments": [
+                        {
+                          "id": 504,
+                          "name": "HNW Clients",
+                          "subsegments": [
+                            {
+                              "id": 606,
+                              "name": "Private Equity"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": 202,
+              "name": "Volatility Risk",
+              "countries": [
+                {
+                  "id": 303,
+                  "name": "Germany",
+                  "assessment_units": [
+                    {
+                      "id": 404,
+                      "name": "Risk Analysis",
+                      "segments": [
+                        {
+                          "id": 505,
+                          "name": "Hedge Funds",
+                          "subsegments": [
+                            {
+                              "id": 607,
+                              "name": "Derivatives Trading"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 102,
+          "name": "Medium",
+          "factors": [
+            {
+              "id": 203,
+              "name": "Systemic Risk",
+              "countries": [
+                {
+                  "id": 304,
+                  "name": "India",
+                  "assessment_units": [
+                    {
+                      "id": 405,
+                      "name": "Banking Operations",
+                      "segments": [
+                        {
+                          "id": 506,
+                          "name": "Retail Lending",
+                          "subsegments": [
+                            {
+                              "id": 608,
+                              "name": "Microfinance"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Credit Risk",
+      "ratings": [
+        {
+          "id": 103,
+          "name": "Low",
+          "factors": [
+            {
+              "id": 204,
+              "name": "Default Risk",
+              "countries": [
+                {
+                  "id": 305,
+                  "name": "Japan",
+                  "assessment_units": [
+                    {
+                      "id": 406,
+                      "name": "Corporate Credit",
+                      "segments": [
+                        {
+                          "id": 507,
+                          "name": "Large Business Loans",
+                          "subsegments": [
+                            {
+                              "id": 609,
+                              "name": "Corporate Term Loans"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
