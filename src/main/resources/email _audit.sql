@@ -1,6 +1,11 @@
 CREATE OR REPLACE FUNCTION email_template_audit_trigger_fn()
 RETURNS TRIGGER AS $$
 BEGIN
+    -- Ensure the trigger does not fire when inserting into the audit table itself
+    IF TG_TABLE_NAME = 'email_template_audit' THEN
+        RETURN NULL;
+    END IF;
+
     BEGIN
         -- If a new record is inserted
         IF TG_OP = 'INSERT' THEN
@@ -21,7 +26,7 @@ BEGIN
                 COALESCE(NEW.updated_at, now())
             );
 
-        -- If an existing record is updated, store the new values in audit table
+        -- If an existing record is updated
         ELSIF TG_OP = 'UPDATE' THEN
             INSERT INTO drm_sit.email_template_audit (
                 id, name, to_address, cc_address, subject, body, status, created_by, created_at, updated_by, updated_at
@@ -40,7 +45,7 @@ BEGIN
                 COALESCE(NEW.updated_at, now())
             );
 
-        -- If a record is deleted, store the old values in audit table
+        -- If a record is deleted
         ELSIF TG_OP = 'DELETE' THEN
             INSERT INTO drm_sit.email_template_audit (
                 id, name, to_address, cc_address, subject, body, status, created_by, created_at, updated_by, updated_at
