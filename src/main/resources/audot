@@ -1,0 +1,64 @@
+CREATE OR REPLACE FUNCTION email_template_library_audit_trigger_fn()
+RETURNS TRIGGER AS $$
+DECLARE
+    col_name TEXT;
+    old_val TEXT;
+    new_val TEXT;
+BEGIN
+    -- Prevent recursion: If the trigger fires on the audit table, exit
+    IF TG_RELNAME = 'email_template_library_audit' THEN
+        RETURN NULL;
+    END IF;
+
+    -- INSERT: Log all new column values (old_value = NULL)
+    IF TG_OP = 'INSERT' THEN
+        INSERT INTO drm_sit.email_template_library_audit (id, field_changed, old_value, new_value, action, actionby, actiondate) 
+        VALUES (NEW.id, 'name', NULL, NEW.name, 'INSERT', NEW.created_by, NOW()),
+               (NEW.id, 'to_address', NULL, NEW.to_address, 'INSERT', NEW.created_by, NOW()),
+               (NEW.id, 'cc_address', NULL, NEW.cc_address, 'INSERT', NEW.created_by, NOW()),
+               (NEW.id, 'subject', NULL, NEW.subject, 'INSERT', NEW.created_by, NOW()),
+               (NEW.id, 'body', NULL, NEW.body, 'INSERT', NEW.created_by, NOW()),
+               (NEW.id, 'status', NULL, NEW.status, 'INSERT', NEW.created_by, NOW());
+
+    -- UPDATE: Log only changed fields
+    ELSIF TG_OP = 'UPDATE' THEN
+        IF OLD.name IS DISTINCT FROM NEW.name THEN
+            INSERT INTO drm_sit.email_template_library_audit (id, field_changed, old_value, new_value, action, actionby, actiondate)
+            VALUES (NEW.id, 'name', OLD.name, NEW.name, 'UPDATE', NEW.updated_by, NOW());
+        END IF;
+        IF OLD.to_address IS DISTINCT FROM NEW.to_address THEN
+            INSERT INTO drm_sit.email_template_library_audit
+            VALUES (NEW.id, 'to_address', OLD.to_address, NEW.to_address, 'UPDATE', NEW.updated_by, NOW());
+        END IF;
+        IF OLD.subject IS DISTINCT FROM NEW.subject THEN
+            INSERT INTO drm_sit.email_template_library_audit
+            VALUES (NEW.id, 'subject', OLD.subject, NEW.subject, 'UPDATE', NEW.updated_by, NOW());
+        END IF;
+        IF OLD.body IS DISTINCT FROM NEW.body THEN
+            INSERT INTO drm_sit.email_template_library_audit
+            VALUES (NEW.id, 'body', OLD.body, NEW.body, 'UPDATE', NEW.updated_by, NOW());
+        END IF;
+        IF OLD.status IS DISTINCT FROM NEW.status THEN
+            INSERT INTO drm_sit.email_template_library_audit
+            VALUES (NEW.id, 'status', OLD.status, NEW.status, 'UPDATE', NEW.updated_by, NOW());
+        END IF;
+
+    -- DELETE: Log all old column values (new_value = NULL)
+    ELSIF TG_OP = 'DELETE' THEN
+        INSERT INTO drm_sit.email_template_library_audit (id, field_changed, old_value, new_value, action, actionby, actiondate) 
+        VALUES (OLD.id, 'name', OLD.name, NULL, 'DELETE', OLD.updated_by, NOW()),
+               (OLD.id, 'to_address', OLD.to_address, NULL, 'DELETE', OLD.updated_by, NOW()),
+               (OLD.id, 'cc_address', OLD.cc_address, NULL, 'DELETE', OLD.updated_by, NOW()),
+               (OLD.id, 'subject', OLD.subject, NULL, 'DELETE', OLD.updated_by, NOW()),
+               (OLD.id, 'body', OLD.body, NULL, 'DELETE', OLD.updated_by, NOW()),
+               (OLD.id, 'status', OLD.status, NULL, 'DELETE', OLD.updated_by, NOW());
+    END IF;
+
+    RETURN NULL;
+
+EXCEPTION 
+    WHEN OTHERS THEN 
+        RAISE WARNING 'Error in email_template_library_audit_trigger_fn: %', SQLERRM;
+        RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
