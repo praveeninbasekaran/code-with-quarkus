@@ -76,3 +76,10 @@ BEGIN
     END;
 END;
 $$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS email_template_audit_trigger ON drm_sit.email_template;
+
+CREATE TRIGGER email_template_audit_trigger
+AFTER INSERT OR UPDATE OR DELETE ON drm_sit.email_template
+FOR EACH ROW
+EXECUTE FUNCTION email_template_audit_trigger_fn();
