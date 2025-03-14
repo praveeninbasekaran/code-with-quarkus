@@ -1,0 +1,72 @@
+CREATE OR REPLACE FUNCTION email_template_library_audit_trigger_fn()
+RETURNS TRIGGER AS $$
+DECLARE
+    column_name TEXT;
+    old_val TEXT;
+    new_val TEXT;
+BEGIN
+    -- Prevent recursion: If trigger fires on the audit table, exit
+    IF TG_RELNAME = 'email_template_library_audit' THEN
+        RETURN NULL;
+    END IF;
+
+    -- INSERT: Log all new column values (old_value = NULL)
+    IF TG_OP = 'INSERT' THEN
+        FOR column_name IN 
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'email_template' 
+            AND column_name NOT IN ('created_at', 'updated_at') -- Exclude timestamps if not needed
+        LOOP
+            EXECUTE format(
+                'INSERT INTO drm_sit.email_template_library_audit (id, field_changed, old_value, new_value, action, actionby, actiondate) 
+                VALUES ($1, $2, NULL, $3, ''INSERT'', $4, NOW())'
+            ) 
+            USING NEW.id, column_name, NEW.*::hstore -> column_name, NEW.created_by;
+        END LOOP;
+
+    -- UPDATE: Log only changed fields
+    ELSIF TG_OP = 'UPDATE' THEN
+        FOR column_name IN 
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'email_template' 
+            AND column_name NOT IN ('created_at', 'updated_at')
+        LOOP
+            old_val := OLD.*::hstore -> column_name;
+            new_val := NEW.*::hstore -> column_name;
+
+            -- Only log changes where the value is different
+            IF old_val IS DISTINCT FROM new_val THEN
+                EXECUTE format(
+                    'INSERT INTO drm_sit.email_template_library_audit (id, field_changed, old_value, new_value, action, actionby, actiondate) 
+                    VALUES ($1, $2, $3, $4, ''UPDATE'', $5, NOW())'
+                ) 
+                USING NEW.id, column_name, old_val, new_val, NEW.updated_by;
+            END IF;
+        END LOOP;
+
+    -- DELETE: Log all old column values (new_value = NULL)
+    ELSIF TG_OP = 'DELETE' THEN
+        FOR column_name IN 
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'email_template' 
+            AND column_name NOT IN ('created_at', 'updated_at')
+        LOOP
+            EXECUTE format(
+                'INSERT INTO drm_sit.email_template_library_audit (id, field_changed, old_value, new_value, action, actionby, actiondate) 
+                VALUES ($1, $2, $3, NULL, ''DELETE'', $4, NOW())'
+            ) 
+            USING OLD.id, column_name, OLD.*::hstore -> column_name, OLD.updated_by;
+        END LOOP;
+    END IF;
+
+    RETURN NULL;
+
+EXCEPTION 
+    WHEN OTHERS THEN 
+        RAISE WARNING 'Error in email_template_library_audit_trigger_fn: %', SQLERRM;
+        RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
