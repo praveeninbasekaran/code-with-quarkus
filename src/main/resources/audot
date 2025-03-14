@@ -23,7 +23,7 @@ BEGIN
     -- UPDATE: Log only changed fields
     ELSIF TG_OP = 'UPDATE' THEN
         IF OLD.name IS DISTINCT FROM NEW.name THEN
-            INSERT INTO drm_sit.email_template_library_audit (id, field_changed, old_value, new_value, action, actionby, actiondate)
+            INSERT INTO drm_sit.email_template_library_audit
             VALUES (NEW.id, 'name', OLD.name, NEW.name, 'UPDATE', NEW.updated_by, NOW());
         END IF;
         IF OLD.to_address IS DISTINCT FROM NEW.to_address THEN
