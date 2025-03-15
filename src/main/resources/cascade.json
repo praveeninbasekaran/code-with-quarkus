@@ -2,11 +2,11 @@
   "risk_types": [
     {
       "id": 1,
-      "name": "Market Risk",
+      "name": "AML",
       "ratings": [
         {
           "id": 101,
-          "name": "High",
+          "name": "IR",
           "factors": [
             {
               "id": 201,
@@ -124,7 +124,7 @@
         },
         {
           "id": 102,
-          "name": "Medium",
+          "name": "CE",
           "factors": [
             {
               "id": 203,
@@ -160,11 +160,11 @@
     },
     {
       "id": 2,
-      "name": "Credit Risk",
+      "name": "Sanctions",
       "ratings": [
         {
           "id": 103,
-          "name": "Low",
+          "name": "IR",
           "factors": [
             {
               "id": 204,
