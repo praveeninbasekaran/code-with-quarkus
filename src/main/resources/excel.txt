@@ -5,3 +5,12 @@ TEXTJOIN(", ", TRUE, "''" & TRIM(MID(A1, FIND("<>", A1) + 3, FIND("Then", A1) - 
 ")', '" & MID(A1, FIND("LineError", A1) + 12, FIND("Exit Sub", A1) - FIND("LineError", A1) - 13) & 
 "', '" & MID(A1, FIND("LineError", A1) + 12, FIND("Exit Sub", A1) - FIND("LineError", A1) - 13) & 
 "', 'T');"
+
+3
+="INSERT INTO GENERIC_VALIDATION_RULE (RULEID,TEMPLATENAME,COLUMN_NAME,CONDITION,CONDITION_NAME,ERROR_MESSAGE,USER_SKIP) values (" &
+B1 & ",'" & C1 & "','" & UPPER(D1) & "','UPPER(" & UPPER(D1) & ") IN (" &
+"''" & MID(A1, FIND("""",A1)+1, FIND(""" And",A1)-(FIND("""",A1)+1)) & "'',''" & 
+MID(A1, FIND("And Cells",A1)+15, FIND(""" Then",A1)-(FIND("And Cells",A1)+15)) & "''" &
+")'," &
+"'" & MID(A1,FIND("LineError",A1)+12,FIND("Exit Sub",A1)-FIND("LineError",A1)-14) & "'," &
+"'" & MID(A1,FIND("LineError",A1)+12,FIND("Exit Sub",A1)-FIND("LineError",A1)-14) & "','T');"
