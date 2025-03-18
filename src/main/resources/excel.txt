@@ -1,0 +1,4 @@
+="INSERT INTO GENERIC_VALIDATION_RULE (RULEID, TEMPLATENAME, COLUMN_NAME, CONDITION, CONDITION_NAME, USER_SKIP) VALUES (" & 
+B1 & ", '" & C1 & "', '" & D1 & "', 'UPPER(" & D1 & ") IN (" & 
+TEXTJOIN(", ", TRUE, CHAR(34) & TRIM(MID(A1, FIND("<>", A1) + 3, FIND("Then", A1) - FIND("<>", A1) - 3)) & CHAR(34)) & 
+")', '" & MID(A1, FIND("LineError", A1) + 12, FIND("Exit Sub", A1) - FIND("LineError", A1) - 13) & "', 'T');"
