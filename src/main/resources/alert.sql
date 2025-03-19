@@ -162,3 +162,21 @@ CREATE INDEX idx_alert_decision_stage ON alert_stage_decisions(alert_id, stage);
 -- ============================================
 CREATE TABLE alerts_active PARTITION OF alerts FOR VALUES IN ('Open', 'In Progress');
 CREATE TABLE alerts_closed PARTITION OF alerts FOR VALUES IN ('Closed', 'Escalated');
+
+10.
+
+CREATE TABLE alert_audit_history (
+    audit_id SERIAL PRIMARY KEY,
+    alert_id INT REFERENCES alerts(alert_id) ON DELETE CASCADE,
+    action_stage INT CHECK (action_stage BETWEEN 1 AND 3), -- Stage 1, 2, 3
+    user_role VARCHAR(255),  -- Role of the user who modified the alert
+    user_id INT REFERENCES users(user_id),
+    action_taken VARCHAR(255) CHECK (action_taken IN ('Acknowledge', 'Assign to Me', 'Refer-back', 'Aligned', 'Not-Aligned', 'Escalated', 'Resolved')),
+    assigned_to_role VARCHAR(255), -- Who the alert was reassigned to
+    assigned_to_user INT REFERENCES users(user_id),
+    action_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    comments TEXT CHECK (char_length(comments) <= 5000),
+    rule_management_action TEXT CHECK (char_length(rule_management_action) <= 5000)
+);
+
+
