@@ -178,5 +178,98 @@ CREATE TABLE alert_audit_history (
     comments TEXT CHECK (char_length(comments) <= 5000),
     rule_management_action TEXT CHECK (char_length(rule_management_action) <= 5000)
 );
+---- 1️⃣ Insert a New Alert
+INSERT INTO alerts (rule_id, alert_date, type_of_alert, rule_name, rule_description, criteria,
+                    risk_type_id, rating_id, factor_id, country_id, assessment_unit_id,
+                    segment_id, subsegment_id, assigned_role, assigned_to, alert_status,
+                    last_action_taken, last_action_date, due_date, latest_reminder_date,
+                    escalation_date, alert_age)
+VALUES (1001, CURRENT_TIMESTAMP, 'Ratings', 'Rule Name 1', 'This rule monitors risk changes.',
+        'current_ir_rating > prev_ir_rating', 5, 10, 15, 20, 25, 30, 35, 
+        'Risk Manager', 2001, 'Open', 'Created', CURRENT_TIMESTAMP, 
+        CURRENT_TIMESTAMP + INTERVAL '5 days', NULL, NULL, 0)
+RETURNING alert_id;
 
+-- Assume alert_id returned is 1212424
+
+-- 2️⃣ Insert Initial Ratings
+INSERT INTO alert_ratings_history (alert_id, rating_type, rating_value, rating_date)
+VALUES (1212424, 'Current', 'Medium', CURRENT_TIMESTAMP),
+       (1212424, 'Previous', 'Low', CURRENT_TIMESTAMP - INTERVAL '6 months');
+
+-- 3️⃣ Insert First Alert Action (Creation)
+INSERT INTO alert_actions (alert_id, action_stage, action_taken, action_by, action_role, action_notes)
+VALUES (1212424, 1, 'Created', 2001, 'Risk Manager', 'Initial alert created.');
+
+-- 4️⃣ Log in Audit History
+INSERT INTO alert_audit_history (alert_id, action_stage, user_role, user_id, action_taken, 
+                                 assigned_to_role, assigned_to_user, comments, rule_management_action)
+VALUES (1212424, 1, 'Risk Manager', 2001, 'Created', 'Risk Manager', 2001, 
+        'New alert generated based on rule trigger.', 'Monitor risk evolution.');
+
+Scenario 1: User Assigns Alert to Themselves
+
+-- 1️⃣ Update Alert Status
+UPDATE alerts
+SET alert_status = 'In Progress', assigned_to = 2002, last_action_taken = 'Assigned',
+    last_action_date = CURRENT_TIMESTAMP
+WHERE alert_id = 1212424;
+
+-- 2️⃣ Log Action in `alert_actions`
+INSERT INTO alert_actions (alert_id, action_stage, action_taken, action_by, action_role, action_notes)
+VALUES (1212424, 1, 'Assign to Me', 2002, 'MS Specialist', 'User took ownership.');
+
+-- 3️⃣ Log in Audit History
+INSERT INTO alert_audit_history (alert_id, action_stage, user_role, user_id, action_taken, 
+                                 assigned_to_role, assigned_to_user, comments, rule_management_action)
+VALUES (1212424, 1, 'MS Specialist', 2002, 'Assign to Me', 'MS Specialist', 2002, 
+        'User self-assigned this alert.', 'Proceed with analysis.');
+
+
+Scenario 2: User Updates Findings & Risk Management Action
+-- 1️⃣ Update Findings and Risk Management Plan
+UPDATE alert_actions
+SET findings = 'Risk shows increasing volatility.', 
+    risk_management_action = 'Implement tighter compliance checks.'
+WHERE alert_id = 1212424 AND action_stage = 1 AND action_by = 2002;
+
+-- 2️⃣ Log in Audit History
+INSERT INTO alert_audit_history (alert_id, action_stage, user_role, user_id, action_taken, 
+                                 assigned_to_role, assigned_to_user, comments, rule_management_action)
+VALUES (1212424, 1, 'MS Specialist', 2002, 'Updated Findings', 'MS Specialist', 2002, 
+        'User identified increasing volatility.', 'Stronger compliance needed.');
+
+Scenario 3: Alert Escalates to Next Stage
+
+-- 1️⃣ Update Alert to Next Stage & Assign Reviewer
+UPDATE alerts
+SET alert_status = 'In Progress', assigned_to = 2003, last_action_taken = 'Escalated',
+    last_action_date = CURRENT_TIMESTAMP, latest_reminder_date = CURRENT_TIMESTAMP
+WHERE alert_id = 1212424;
+
+-- 2️⃣ Insert New Stage Action
+INSERT INTO alert_actions (alert_id, action_stage, action_taken, action_by, action_role, action_notes)
+VALUES (1212424, 2, 'Escalated', 2002, 'MS Specialist', 'Escalated to LoD Country Reviewer.');
+
+-- 3️⃣ Log in Audit History
+INSERT INTO alert_audit_history (alert_id, action_stage, user_role, user_id, action_taken, 
+                                 assigned_to_role, assigned_to_user, comments, rule_management_action)
+VALUES (1212424, 2, 'MS Specialist', 2002, 'Escalated', 'LoD Country Reviewer', 2003, 
+        'Risk severity increased; needs further review.', 'Proceed with escalation measures.');
+
+Scenario 4: Alert is Closed After Review
+-- 1️⃣ Close the Alert
+UPDATE alerts
+SET alert_status = 'Closed', last_action_taken = 'Resolved', last_action_date = CURRENT_TIMESTAMP
+WHERE alert_id = 1212424;
+
+-- 2️⃣ Final Action in `alert_actions`
+INSERT INTO alert_actions (alert_id, action_stage, action_taken, action_by, action_role, action_notes)
+VALUES (1212424, 3, 'Resolved', 2003, 'LoD Country Reviewer', 'Final resolution confirmed.');
+
+-- 3️⃣ Log in Audit History
+INSERT INTO alert_audit_history (alert_id, action_stage, user_role, user_id, action_taken, 
+                                 assigned_to_role, assigned_to_user, comments, rule_management_action)
+VALUES (1212424, 3, 'LoD Country Reviewer', 2003, 'Resolved', NULL, NULL, 
+        'Risk addressed, closing alert.', 'Final action executed.');
 
