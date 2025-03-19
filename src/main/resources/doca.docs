@@ -1,0 +1,167 @@
+📄 Alert Management System - Database Documentation
+
+Overview
+
+The Alert Management System tracks financial risk alerts and actions taken by users in a multi-stage workflow. This documentation explains each table, its purpose, and how they relate to each other in simple terms.
+
+⸻
+
+🔗 High-Level Table Relationships
+	1.	Rules define Alerts ➝ When a rule is triggered, an alert is created.
+	2.	Alerts track issues ➝ They store metadata and who is assigned to handle them.
+	3.	Alert Ratings track changes ➝ Stores the previous and current ratings over time.
+	4.	Alert Actions store workflow events ➝ Logs who did what action and when.
+	5.	Alert Stage Decisions track approvals ➝ Stores decisions made at each workflow stage.
+	6.	Alert Audit History tracks all modifications ➝ Keeps a full change log for compliance.
+
+⸻
+
+🛠 Table Documentation
+
+Each table is described below, along with its purpose and key columns.
+
+1️⃣ rules (Business Rules Table)
+	•	Purpose: Stores risk monitoring rules that trigger alerts.
+	•	Why it’s needed: Without rules, we can’t determine when an alert should be created.
+
+Column	Description
+rule_id	Unique ID for the rule
+rule_name	Name of the rule (e.g., “High Credit Risk”)
+rule_description	Explanation of what the rule does
+
+🔗 Relation: A rule can generate multiple alerts.
+
+⸻
+
+2️⃣ alerts (Main Alert Table)
+	•	Purpose: Stores every alert generated based on rules.
+	•	Why it’s needed: This is the core table that keeps track of what needs action.
+
+Column	Description
+alert_id	Unique ID for the alert
+rule_id	The rule that triggered this alert
+alert_date	When the alert was created
+type_of_alert	Category of alert (e.g., Ratings, Risk Change)
+rule_name	The name of the rule that triggered it
+rule_description	Description of the rule
+criteria	Logical condition that triggered the alert
+assigned_to	User ID of the person handling the alert
+assigned_role	Role of the assigned user
+alert_status	Current status (Open, In Progress, Closed, Escalated)
+due_date	Deadline for resolving the alert
+latest_reminder_date	Last time a reminder was sent
+escalation_date	If escalated, when did it happen?
+
+🔗 Relation:
+	•	An alert is linked to a rule (rule_id).
+	•	Users are assigned to handle alerts.
+
+⸻
+
+3️⃣ alert_ratings_history (Tracks Rating Changes)
+	•	Purpose: Stores historical risk ratings to compare past vs. current risk.
+	•	Why it’s needed: Helps track how an alert progresses over time.
+
+Column	Description
+rating_id	Unique ID for rating history
+alert_id	The alert this rating belongs to
+rating_type	“Current” or “Previous”
+rating_value	The rating value (e.g., High, Medium, Low)
+rating_date	When this rating was recorded
+
+🔗 Relation:
+	•	Each alert can have multiple rating updates over time.
+
+⸻
+
+4️⃣ alert_actions (Tracks User Actions)
+	•	Purpose: Logs who took what action on an alert.
+	•	Why it’s needed: Keeps a record of workflow progress.
+
+Column	Description
+action_id	Unique ID for the action
+alert_id	The alert this action belongs to
+action_stage	Workflow stage (1, 2, or 3)
+action_taken	What was done (e.g., “Escalated”, “Resolved”)
+action_by	User ID of the person taking action
+action_role	Role of the person taking action
+action_date	When the action was taken
+findings	Notes on what was found
+risk_management_action	What action was taken to handle the risk
+
+🔗 Relation:
+	•	Each alert has multiple actions as users update its status.
+
+⸻
+
+5️⃣ alert_stage_decisions (Tracks Approvals & Rejections)
+	•	Purpose: Stores approvals, escalations, or reassignments in a structured workflow.
+	•	Why it’s needed: Ensures that each stage is properly reviewed.
+
+Column	Description
+decision_id	Unique ID for the decision
+alert_id	The alert this decision belongs to
+stage	Workflow stage (1, 2, or 3)
+role	Role of the person making the decision
+decision	“Accepted”, “Rejected”, “Escalated”, or “Reassigned”
+action_date	When the decision was made
+findings	Any additional comments
+risk_management_action	Steps taken based on the decision
+
+🔗 Relation:
+	•	Each alert has multiple stage-based decisions.
+
+⸻
+
+6️⃣ alert_audit_history (Tracks Changes Over Time)
+	•	Purpose: Maintains a full audit trail of all modifications.
+	•	Why it’s needed: Provides a history of who changed what and when.
+
+Column	Description
+audit_id	Unique ID for the audit entry
+alert_id	The alert that was modified
+action_stage	Workflow stage (1, 2, or 3)
+user_role	Role of the user who made changes
+user_id	User ID of the person modifying the alert
+action_taken	What was changed (e.g., “Assigned”, “Escalated”)
+assigned_to_role	New assigned role (if reassigned)
+assigned_to_user	New assigned user ID (if reassigned)
+action_date	Timestamp of modification
+comments	Explanation of the change
+rule_management_action	Risk mitigation steps taken
+
+🔗 Relation:
+	•	Each alert has an audit log tracking all changes.
+
+⸻
+
+✅ Visualizing Relationships
+
+[Rules] → [Alerts] → [Alert Ratings History]
+          → [Alert Actions] → [Alert Stage Decisions]
+          → [Alert Audit History]
+
+
+
+⸻
+
+🔹 Summary
+
+Table	Purpose
+rules	Defines the business logic for generating alerts.
+alerts	Stores all active alerts that need action.
+alert_ratings_history	Keeps track of previous vs. current ratings.
+alert_actions	Logs who did what in the alert workflow.
+alert_stage_decisions	Tracks approvals, rejections, and escalations.
+alert_audit_history	Stores a full history of all modifications.
+
+
+
+⸻
+
+✅ Next Steps
+	1.	Would you like an ER diagram with these relationships?
+	2.	Do you need sample queries for retrieving reports?
+	3.	Would you like a Quarkus API design to interact with these tables?
+
+Let me know how you’d like to proceed! 🚀
