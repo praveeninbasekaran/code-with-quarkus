@@ -273,3 +273,40 @@ INSERT INTO alert_audit_history (alert_id, action_stage, user_role, user_id, act
 VALUES (1212424, 3, 'LoD Country Reviewer', 2003, 'Resolved', NULL, NULL, 
         'Risk addressed, closing alert.', 'Final action executed.');
 
+
+CREATE OR REPLACE VIEW drm_sit.alert_t_alert_dashboard_all AS
+SELECT 
+    atad.alert_id,
+    atad.alert_date,
+    atad.type_of_alert,
+    atad.rule_name,
+    atad.rule_description,
+    atad.risk_type,
+    atad.rating,
+    atad.factor,
+    atad.country,
+    atad.assessment_unit,
+    atad.segment,
+    atad.subsegment,
+    COALESCE(ata.action_role, '') AS assigned_role,
+    COALESCE(ata.action_by::TEXT, '') AS assigned_to,
+    atad.alert_status,
+    COALESCE(ata.action_taken, '') AS last_action_taken,
+    COALESCE(ata.action_date::TEXT, '') AS last_action_date,
+    atad.due_date,
+    atad.latest_reminder_date,
+    atad.escalation_date,
+    atad.alert_age
+FROM drm_sit.alert_t_alert_data atad
+LEFT JOIN (
+    SELECT DISTINCT ON (alert_id)
+        alert_id,
+        action_taken,
+        action_date,
+        action_by,
+        action_role
+    FROM drm_sit.alert_t_actions
+    ORDER BY alert_id, action_date DESC
+) ata ON atad.alert_id = ata.alert_id;
+
+
