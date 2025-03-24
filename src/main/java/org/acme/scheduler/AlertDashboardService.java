@@ -24,3 +24,18 @@ public class AlertDashboardService {
                 .orElseThrow(() -> new NotFoundException("Alert not found for ID: " + alertId));
     }
 }
+public List<AlertDashboardDto> getRelevantAlertsForRole(String role) {
+    String query = """
+        SELECT * FROM drm_sit.alert_t_alert_dashboard_relevant
+        WHERE value->'workflow'->'stage_1'->'role' ? :role
+           OR value->'workflow'->'stage_2'->'role' ? :role
+           OR value->'workflow'->'stage_3'->'role' ? :role
+        """;
+
+    return entityManager.createNativeQuery(query, AlertDashboardView.class)
+                        .setParameter("role", role)
+                        .getResultList()
+                        .stream()
+                        .map(AlertMapper::toDashboardDto)
+                        .toList();
+}
