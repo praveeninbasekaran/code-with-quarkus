@@ -99,5 +99,35 @@ private static void setCoreAlertFields(AlertActionDetailsDto dto, AlertData aler
         dto.riskManagementAction = entity.getRiskManagementAction();
         return dto;
 }
+
+   /**
+     * Maps AlertDashboardView to AlertDashboardDto
+     */
+    public static AlertDashboardDto toDashboardDto(AlertDashboardView view) {
+        var dto = new AlertDashboardDto();
+        dto.alertId = view.alertId;
+        dto.alertDate = view.alertDate;
+        dto.typeOfAlert = view.typeOfAlert;
+        dto.ruleName = view.ruleName;
+        dto.ruleDescription = view.ruleDescription;
+        dto.riskType = view.riskType;
+        dto.rating = view.rating;
+        dto.factor = view.factor;
+        dto.country = view.country;
+        dto.assessmentUnit = view.assessmentUnit;
+        dto.segment = view.segment;
+        dto.subsegment = view.subsegment;
+        dto.assignedRole = view.assignedRole;
+        dto.assignedTo = view.assignedTo;
+        dto.alertStatus = view.alertStatus;
+        dto.lastActionTaken = view.lastActionTaken;
+        dto.lastActionDate = view.lastActionDate;
+        dto.dueDate = view.dueDate;
+        dto.latestReminderDate = view.latestReminderDate;
+        dto.escalationDate = view.escalationDate;
+        dto.alertAge = view.alertAge;
+        return dto;
+    }
+
     
 }
