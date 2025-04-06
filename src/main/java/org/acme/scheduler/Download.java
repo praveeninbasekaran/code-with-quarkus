@@ -119,6 +119,14 @@ return Response.ok(excelData)
         .build();
 
 
+public class ExcelHeaderConstants {
+    public static final Map<String, List<String>> HEADERS = Map.of(
+        "student", List.of("ID", "Name", "Age", "Country"),
+        "employee", List.of("ID", "Name", "Department", "Salary")
+    );
+}
+
+
 
 
 
