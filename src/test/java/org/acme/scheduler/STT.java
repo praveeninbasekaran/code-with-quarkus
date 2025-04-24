@@ -81,4 +81,76 @@ class SchedulerTasksTest {
         schedulerTasks.updateEmailStatusFailed(null, "Failed");
         // Should not throw any error and simply return
     }
+
+
+import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
+import nl.altindag.log.LogCaptor;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@QuarkusTest
+class SchedulerTasksUpdateEmailStatusFailedTest {
+
+    @Inject
+    SchedulerTasks schedulerTasks;
+
+    @InjectMock
+    DataSource dataSource;
+
+    @Mock
+    Connection mockConnection;
+
+    @Mock
+    PreparedStatement mockPreparedStatement;
+
+    @Test
+    void testUpdateEmailStatusFailed_withNullId_shouldLogAndReturn() throws SQLException {
+        LogCaptor logCaptor = LogCaptor.forClass(SchedulerTasks.class);
+
+        schedulerTasks.updateEmailStatusFailed(null, "Failed");
+
+        assertTrue(logCaptor.getInfoLogs().stream()
+                .anyMatch(log -> log.contains("No EmailRequestIds provided for update")));
+    }
+
+    @Test
+    void testUpdateEmailStatusFailed_happyPath_shouldExecuteUpdate() throws Exception {
+        Long requestId = 101L;
+
+        when(dataSource.getConnection()).thenReturn(mockConnection);
+        when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
+        when(mockPreparedStatement.executeUpdate()).thenReturn(1);
+
+        schedulerTasks.updateEmailStatusFailed(requestId, "Failed");
+
+        verify(mockPreparedStatement).setString(eq(1), eq("Failed"));
+        verify(mockPreparedStatement, times(1)).setTimestamp(eq(2), any(Timestamp.class));
+        verify(mockPreparedStatement).setLong(eq(3), eq(requestId));
+        verify(mockPreparedStatement).executeUpdate();
+    }
+
+    @Test
+    void testUpdateEmailStatusFailed_whenSQLException_shouldLogError() throws Exception {
+        Long requestId = 102L;
+
+        when(dataSource.getConnection()).thenThrow(new SQLException("DB down"));
+
+        LogCaptor logCaptor = LogCaptor.forClass(SchedulerTasks.class);
+
+        schedulerTasks.updateEmailStatusFailed(requestId, "Failed");
+
+        assertTrue(logCaptor.getErrorLogs().stream()
+                .anyMatch(log -> log.contains("Error performing bulk update in email_scheduler table")));
+    }
+}
 }
