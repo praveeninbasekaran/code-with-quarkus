@@ -1,0 +1,73 @@
+{
+  "screenTitle": "Dropdown Management",
+  "tabs": [
+    {
+      "tabId": "ratingOverlay",
+      "tabLabel": "Rating overlay category",
+      "metadata": [
+        {
+          "fieldName": "ratingOverlayCategoryId",
+          "label": "Rating overlay category ID",
+          "dataType": "text",
+          "sort": true,
+          "filter": true,
+          "required": true
+        },
+        {
+          "fieldName": "ratingOverlayCategory",
+          "label": "Rating overlay category",
+          "dataType": "text",
+          "sort": false,
+          "filter": false,
+          "required": true
+        },
+        {
+          "fieldName": "status",
+          "label": "Status",
+          "dataType": "dropdown",
+          "options": [
+            { "label": "Active", "value": "active" },
+            { "label": "Inactive", "value": "inactive" }
+          ],
+          "sort": true,
+          "filter": true,
+          "required": true
+        }
+      ]
+    },
+    {
+      "tabId": "adhocRCSA",
+      "tabLabel": "Reason for Adhoc RCSA",
+      "metadata": [
+        {
+          "fieldName": "reasonId",
+          "label": "Reason ID",
+          "dataType": "text",
+          "sort": true,
+          "filter": true,
+          "required": true
+        },
+        {
+          "fieldName": "reasonDescription",
+          "label": "Reason Description",
+          "dataType": "text",
+          "sort": false,
+          "filter": false,
+          "required": true
+        },
+        {
+          "fieldName": "status",
+          "label": "Status",
+          "dataType": "dropdown",
+          "options": [
+            { "label": "Active", "value": "active" },
+            { "label": "Inactive", "value": "inactive" }
+          ],
+          "sort": true,
+          "filter": true,
+          "required": true
+        }
+      ]
+    }
+  ]
+}
