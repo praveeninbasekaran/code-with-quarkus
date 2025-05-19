@@ -1,0 +1,97 @@
+{
+  "tabId": "processDataManagement",
+  "tabLabel": "Process Data Management",
+  "metadata": [
+    {
+      "fieldName": "processId",
+      "label": "Process ID",
+      "dataType": "text",
+      "maxLength": "NA",
+      "required": true
+    },
+    {
+      "fieldName": "processName",
+      "label": "Process Name",
+      "dataType": "text",
+      "maxLength": "NA",
+      "required": true
+    },
+    {
+      "fieldName": "processDescription",
+      "label": "Process Description",
+      "dataType": "textarea",
+      "maxLength": 1000,
+      "required": false
+    },
+    {
+      "fieldName": "processOwner",
+      "label": "Process Owner",
+      "dataType": "text",
+      "maxLength": 255,
+      "required": false
+    },
+    {
+      "fieldName": "businessFunctionL1",
+      "label": "Business Function L1",
+      "dataType": "text",
+      "maxLength": 500,
+      "required": false
+    },
+    {
+      "fieldName": "businessFunctionL2",
+      "label": "Business Function L2",
+      "dataType": "text",
+      "maxLength": 500,
+      "required": false
+    },
+    {
+      "fieldName": "businessFunctionL3",
+      "label": "Business Function L3",
+      "dataType": "text",
+      "maxLength": 500,
+      "required": false
+    },
+    {
+      "fieldName": "country",
+      "label": "Country",
+      "dataType": "text",
+      "maxLength": 255,
+      "required": false
+    },
+    {
+      "fieldName": "legalEntity",
+      "label": "Legal Entity",
+      "dataType": "text",
+      "maxLength": 255,
+      "required": false
+    },
+    {
+      "fieldName": "businessDynamics",
+      "label": "Business Dynamics",
+      "dataType": "textarea",
+      "maxLength": 1000,
+      "required": false
+    },
+    {
+      "fieldName": "processInputs",
+      "label": "Process Inputs",
+      "dataType": "textarea",
+      "maxLength": 1000,
+      "required": false
+    },
+    {
+      "fieldName": "processOutputs",
+      "label": "Process Outputs",
+      "dataType": "textarea",
+      "maxLength": 1000,
+      "required": false
+    },
+    {
+      "fieldName": "processActivities",
+      "label": "Process Activities",
+      "dataType": "textarea",
+      "maxLength": 4000,
+      "required": false
+    }
+  ]
+}
