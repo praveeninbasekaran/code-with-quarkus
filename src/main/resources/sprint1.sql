@@ -35,3 +35,107 @@ INSERT INTO role_dropdown_mapping (role, business_function_l1, business_function
 VALUES
 ('Country Risk owner', 'Investment banking', 'Financial Market', 'Srilanka'),
 ('Country Risk owner', 'Investment banking', 'Financial Market', 'India');
+
+
+-- 1. Create or Replace the Trigger Function
+CREATE OR REPLACE FUNCTION drm_sit.trg_rating_overlay_category_audit_func()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- INSERT action: when a new row is added
+    IF TG_OP = 'INSERT' THEN
+        INSERT INTO drm_sit.rcsa_dropdown_rating_overlay_category_audit (
+            rating_overlay_category_id,
+            rating_overlay_category,
+            status,
+            created_by,
+            created_at,
+            updated_by,
+            updated_at,
+            comments,
+            action
+        ) VALUES (
+            NEW.rating_overlay_category_id,
+            NEW.rating_overlay_category,
+            NEW.status,
+            NEW.created_by,
+            NEW.created_at,
+            NEW.updated_by,
+            NEW.updated_at,
+            NEW.comments,
+            'add'
+        );
+        RETURN NEW;
+
+    -- UPDATE action: edit or status change
+    ELSIF TG_OP = 'UPDATE' THEN
+        INSERT INTO drm_sit.rcsa_dropdown_rating_overlay_category_audit (
+            rating_overlay_category_id,
+            rating_overlay_category,
+            status,
+            created_by,
+            created_at,
+            updated_by,
+            updated_at,
+            comments,
+            action
+        ) VALUES (
+            NEW.rating_overlay_category_id,
+            NEW.rating_overlay_category,
+            NEW.status,
+            NEW.created_by,
+            NEW.created_at,
+            NEW.updated_by,
+            NEW.updated_at,
+            NEW.comments,
+            CASE
+                WHEN OLD.status IS DISTINCT FROM NEW.status THEN
+                    CASE
+                        WHEN NEW.status = 'ACTIVE' THEN 'activate'
+                        WHEN NEW.status = 'INACTIVE' THEN 'deactivate'
+                        ELSE 'edit'
+                    END
+                ELSE 'edit'
+            END
+        );
+        RETURN NEW;
+
+    -- DELETE action
+    ELSIF TG_OP = 'DELETE' THEN
+        INSERT INTO drm_sit.rcsa_dropdown_rating_overlay_category_audit (
+            rating_overlay_category_id,
+            rating_overlay_category,
+            status,
+            created_by,
+            created_at,
+            updated_by,
+            updated_at,
+            comments,
+            action
+        ) VALUES (
+            OLD.rating_overlay_category_id,
+            OLD.rating_overlay_category,
+            OLD.status,
+            OLD.created_by,
+            OLD.created_at,
+            OLD.updated_by,
+            OLD.updated_at,
+            OLD.comments,
+            'delete'
+        );
+        RETURN OLD;
+    END IF;
+
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 2. Drop Existing Trigger if it exists (Optional Safety)
+DROP TRIGGER IF EXISTS trg_rating_overlay_category_audit
+ON drm_sit.rcsa_dropdown_rating_overlay_category;
+
+-- 3. Create the Trigger on Main Table
+CREATE TRIGGER trg_rating_overlay_category_audit
+AFTER INSERT OR UPDATE OR DELETE
+ON drm_sit.rcsa_dropdown_rating_overlay_category
+FOR EACH ROW
+EXECUTE FUNCTION drm_sit.trg_rating_overlay_category_audit_func();
