@@ -118,24 +118,33 @@ EXECUTE FUNCTION drm_sit.trg_rating_overlay_category_audit_func();
 -- ===============================
 -- 3. SEQUENCE FOR reason_for_adhoc_rcsa_audit
 -- ===============================
-CREATE SEQUENCE IF NOT EXISTS drm_sit.seq_reason_for_adhoc_rcsa_audit_id
+
+
+-- 1. Create Sequence
+CREATE SEQUENCE IF NOT EXISTS drm_sit.seq_reason_adhoc_rcsa_audit_id
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
 
--- ===============================
--- 4. TRIGGER FUNCTION FOR reason_for_adhoc_rcsa_audit
--- ===============================
-CREATE OR REPLACE FUNCTION drm_sit.trg_reason_for_adhoc_rcsa_audit_func()
+-- 2. Drop Trigger if Exists (safety)
+DROP TRIGGER IF EXISTS trg_reason_adhoc_rcsa_audit
+ON drm_sit.rcsa_dropdown_reason_adhoc_rcsa;
+
+-- 3. Drop Function if Exists (safety)
+DROP FUNCTION IF EXISTS drm_sit.trg_reason_adhoc_rcsa_audit_func();
+
+-- 4. Create Trigger Function
+CREATE OR REPLACE FUNCTION drm_sit.trg_reason_adhoc_rcsa_audit_func()
 RETURNS TRIGGER AS $$
 BEGIN
+    -- INSERT
     IF TG_OP = 'INSERT' THEN
-        INSERT INTO drm_sit.rcsa_dropdown_reason_for_adhoc_rcsa_audit (
-            reason_for_adhoc_rcsa_audit_id,
-            reason_for_adhoc_rcsa_id,
-            reason_for_adhoc_rcsa,
+        INSERT INTO drm_sit.rcsa_dropdown_reason_adhoc_rcsa_audit (
+            reason_audit_id,
+            reason_id,
+            reason,
             status,
             created_by,
             created_at,
@@ -144,9 +153,9 @@ BEGIN
             comments,
             action
         ) VALUES (
-            nextval('drm_sit.seq_reason_for_adhoc_rcsa_audit_id'),
-            NEW.reason_for_adhoc_rcsa_id,
-            NEW.reason_for_adhoc_rcsa,
+            nextval('drm_sit.seq_reason_adhoc_rcsa_audit_id'),
+            NEW.reason_id,
+            NEW.reason,
             NEW.status,
             NEW.created_by,
             NEW.created_at,
@@ -157,11 +166,12 @@ BEGIN
         );
         RETURN NEW;
 
+    -- UPDATE
     ELSIF TG_OP = 'UPDATE' THEN
-        INSERT INTO drm_sit.rcsa_dropdown_reason_for_adhoc_rcsa_audit (
-            reason_for_adhoc_rcsa_audit_id,
-            reason_for_adhoc_rcsa_id,
-            reason_for_adhoc_rcsa,
+        INSERT INTO drm_sit.rcsa_dropdown_reason_adhoc_rcsa_audit (
+            reason_audit_id,
+            reason_id,
+            reason,
             status,
             created_by,
             created_at,
@@ -170,9 +180,9 @@ BEGIN
             comments,
             action
         ) VALUES (
-            nextval('drm_sit.seq_reason_for_adhoc_rcsa_audit_id'),
-            NEW.reason_for_adhoc_rcsa_id,
-            NEW.reason_for_adhoc_rcsa,
+            nextval('drm_sit.seq_reason_adhoc_rcsa_audit_id'),
+            NEW.reason_id,
+            NEW.reason,
             NEW.status,
             NEW.created_by,
             NEW.created_at,
@@ -191,11 +201,12 @@ BEGIN
         );
         RETURN NEW;
 
+    -- DELETE
     ELSIF TG_OP = 'DELETE' THEN
-        INSERT INTO drm_sit.rcsa_dropdown_reason_for_adhoc_rcsa_audit (
-            reason_for_adhoc_rcsa_audit_id,
-            reason_for_adhoc_rcsa_id,
-            reason_for_adhoc_rcsa,
+        INSERT INTO drm_sit.rcsa_dropdown_reason_adhoc_rcsa_audit (
+            reason_audit_id,
+            reason_id,
+            reason,
             status,
             created_by,
             created_at,
@@ -204,9 +215,9 @@ BEGIN
             comments,
             action
         ) VALUES (
-            nextval('drm_sit.seq_reason_for_adhoc_rcsa_audit_id'),
-            OLD.reason_for_adhoc_rcsa_id,
-            OLD.reason_for_adhoc_rcsa,
+            nextval('drm_sit.seq_reason_adhoc_rcsa_audit_id'),
+            OLD.reason_id,
+            OLD.reason,
             OLD.status,
             OLD.created_by,
             OLD.created_at,
@@ -222,12 +233,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- DROP and CREATE TRIGGER
-DROP TRIGGER IF EXISTS trg_reason_for_adhoc_rcsa_audit
-ON drm_sit.rcsa_dropdown_reason_for_adhoc_rcsa;
-
-CREATE TRIGGER trg_reason_for_adhoc_rcsa_audit
+-- 5. Create Trigger
+CREATE TRIGGER trg_reason_adhoc_rcsa_audit
 AFTER INSERT OR UPDATE OR DELETE
-ON drm_sit.rcsa_dropdown_reason_for_adhoc_rcsa
+ON drm_sit.rcsa_dropdown_reason_adhoc_rcsa
 FOR EACH ROW
-EXECUTE FUNCTION drm_sit.trg_reason_for_adhoc_rcsa_audit_func();
+EXECUTE FUNCTION drm_sit.trg_reason_adhoc_rcsa_audit_func();
