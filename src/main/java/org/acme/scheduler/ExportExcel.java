@@ -221,3 +221,120 @@ public class ExcelExportService {
         return FUNCTION_TABLE_MAP.get(functionalityName);
     }
 }
+
+
+//======
+
+public File exportToExcel(ExportRequest request) throws Exception {
+    String tableName = resolveTableName(request.functionalityName);
+    if (tableName == null) {
+        throw new IllegalArgumentException("Invalid functionality name: " + request.functionalityName);
+    }
+
+    // Create temporary Excel file
+    File file = File.createTempFile(tableName + "_export_", ".xlsx");
+
+    try (
+        SXSSFWorkbook workbook = new SXSSFWorkbook(100); // flush after every 100 rows to save memory
+        FileOutputStream out = new FileOutputStream(file);
+        Connection conn = dataSource.getConnection()
+    ) {
+        conn.setAutoCommit(false); // for performance and safety
+        Sheet sheet = workbook.createSheet("Export");
+
+        String sql = buildQuery(request, tableName);
+
+        try (
+            PreparedStatement ps = conn.prepareStatement(sql,
+                    ResultSet.TYPE_FORWARD_ONLY,
+                    ResultSet.CONCUR_READ_ONLY)
+        ) {
+            ps.setFetchSize(1000); // streaming fetch
+
+            try (ResultSet rs = ps.executeQuery()) {
+                ResultSetMetaData meta = rs.getMetaData();
+                int columnCount = meta.getColumnCount();
+
+                // === Create header style ===
+                CellStyle headerStyle = workbook.createCellStyle();
+                Font headerFont = workbook.createFont();
+                headerFont.setBold(true);
+                headerFont.setColor(IndexedColors.WHITE.getIndex());
+                headerStyle.setFont(headerFont);
+                headerStyle.setFillForegroundColor(IndexedColors.BLUE.getIndex());
+                headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+                headerStyle.setBorderTop(BorderStyle.THIN);
+                headerStyle.setBorderBottom(BorderStyle.THIN);
+                headerStyle.setBorderLeft(BorderStyle.THIN);
+                headerStyle.setBorderRight(BorderStyle.THIN);
+
+                // === Create data style ===
+                CellStyle dataStyle = workbook.createCellStyle();
+                dataStyle.setBorderTop(BorderStyle.THIN);
+                dataStyle.setBorderBottom(BorderStyle.THIN);
+                dataStyle.setBorderLeft(BorderStyle.THIN);
+                dataStyle.setBorderRight(BorderStyle.THIN);
+
+                // === Write header row ===
+                Row header = sheet.createRow(0);
+                for (int i = 1; i <= columnCount; i++) {
+                    Cell cell = header.createCell(i - 1);
+                    cell.setCellValue(meta.getColumnLabel(i));
+                    cell.setCellStyle(headerStyle);
+                }
+
+                // === Write data rows ===
+                int rowNum = 1;
+                while (rs.next()) {
+                    Row row = sheet.createRow(rowNum++);
+                    for (int i = 1; i <= columnCount; i++) {
+                        Object value = rs.getObject(i);
+                        Cell cell = row.createCell(i - 1);
+                        cell.setCellValue(value != null ? value.toString() : "");
+                        cell.setCellStyle(dataStyle);
+                    }
+                }
+
+                // (Optional) Auto-size columns — comment out if performance is impacted
+                // for (int i = 0; i < columnCount; i++) {
+                //     sheet.autoSizeColumn(i);
+                // }
+            }
+        }
+
+        workbook.write(out); // Write to file
+    }
+
+    return file;
+}
+private String buildQuery(ExportRequest req, String tableName) {
+    StringBuilder query = new StringBuilder("SELECT ");
+
+    // Dynamically select only requested columns
+    if (req.selectedColumns != null && !req.selectedColumns.isEmpty()) {
+        query.append(req.selectedColumns.stream()
+                .map(col -> "\"" + col + "\"") // wrap in double quotes for safety
+                .collect(Collectors.joining(", ")));
+    } else {
+        query.append("*");
+    }
+
+    query.append(" FROM ").append(tableName);
+
+    // Filters with exact match
+    if (req.filters != null && !req.filters.isEmpty()) {
+        query.append(" WHERE ");
+        List<String> conditions = req.filters.entrySet().stream()
+            .map(entry -> "\"" + entry.getKey() + "\" = '" + entry.getValue() + "'")
+            .collect(Collectors.toList());
+        query.append(String.join(" AND ", conditions));
+    }
+
+    // Sorting
+    if (req.sortBy != null && !req.sortBy.isEmpty()) {
+        query.append(" ORDER BY \"").append(req.sortBy).append("\" ")
+             .append(req.sortDirection != null ? req.sortDirection : "ASC");
+    }
+
+    return query.toString();
+}
