@@ -169,5 +169,94 @@ Would you like me to visualize this into:
 
 Let me know how you’d like to use this!
 
+Thank you — this gives a clear picture of your application’s layered architecture and technology stack.
+
+Below is the updated Application Architecture Overview tailored to your full stack setup, including:
+	•	LIT frontend (TS)
+	•	GraphQL to Experience API (Kotlin + Quarkus)
+	•	REST to Process API (Java + Quarkus + Panache)
+	•	PostgreSQL DB
+
+⸻
+
+Full Stack Architecture Overview
+
+1. Technology Flow Diagram
+
+┌──────────────────────────────────────────────────────────────┐
+│                        Frontend (LIT + TS)                   │
+│      - Dynamic metadata parsing & screen rendering           │
+│      - UI talks to backend via GraphQL                       │
+│                                                              │
+│   [DynamicFormComponent]      [TabLayoutComponent]           │
+│              │                        │                      │
+└──────────────┼────────────────────────┼──────────────────────┘
+               │ GraphQL API Call       │
+               ▼                        ▼
+        ┌──────────────────────────────────────────┐
+        │     Experience API (Kotlin + Quarkus)    │
+        │  - GraphQL schema & validation           │
+        │  - Metadata routing                      │
+        │  - Communicates to Process API via REST  │
+        └──────────────────────────────────────────┘
+                            │
+                            │ REST API Call (JSON)
+                            ▼
+         ┌────────────────────────────────────────────┐
+         │         Process API (Java + Quarkus)       │
+         │  - Business logic & transformation layer   │
+         │  - Uses Panache ORM                        │
+         │  - Interacts directly with PostgreSQL      │
+         └────────────────────────────────────────────┘
+                              │
+                        PostgreSQL
+          (Normalized tables holding actual data)
+
+
+
+⸻
+
+2. Key Module Responsibilities
+
+Layer	Tech Stack	Responsibilities
+Frontend (UI)	Lit + TypeScript	Renders screens dynamically using JSON metadata
+Experience API	Kotlin + Quarkus (GraphQL)	Parses GraphQL queries, validates inputs, routes requests
+Process API	Java + Quarkus + Panache	Executes business logic, DB interactions, DTO transformation
+Database	PostgreSQL	Stores actual structured data (not metadata)
+
+
+
+⸻
+
+3. Additional Design Highlights
+	•	Metadata JSON (static or from Experience API) defines:
+	•	screenType (form or table)
+	•	Field names, types, labels, options, validations
+	•	Frontend is Generic:
+	•	No form/table code is hardcoded.
+	•	Rendering is dynamic and reusable for all screens.
+	•	Backend is Tiered:
+	•	Experience API acts as the controller & validator.
+	•	Process API is the executor and database handler.
+	•	Data Store is Optimized:
+	•	PostgreSQL tables are normalized.
+	•	All audit fields (created_by, updated_at, etc.) are handled here.
+
+⸻
+
+4. Benefits of This Architecture
+
+Benefit	Description
+Separation of Concerns	Each layer handles one responsibility only.
+Scalability	APIs and frontend can be scaled independently.
+Reusability	One frontend can serve multiple business modules.
+Extensibility	Add new forms/tables by just adding metadata and table in DB.
+Performance	Postgres + Panache gives efficient querying with lazy/eager fetch.
+
+
+
+⸻
+
+
 
 
