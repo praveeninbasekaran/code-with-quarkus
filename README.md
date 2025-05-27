@@ -60,3 +60,114 @@ If you want to learn more about building native executables, please consult <htt
 Easily start your REST Web Services
 
 [Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
+
+Perfect — thank you for the clarification. Based on this, I’ve updated the architecture to reflect that:
+	•	Metadata is stored in JSON format, typically served from backend files or API (not from DB).
+	•	Actual data is stored in normalized tables in PostgreSQL, using standard columns and rows.
+
+⸻
+
+Updated Architecture Overview
+
+Metadata-Driven UI Framework (Revised)
+
+A declarative system where UI rendering is powered by JSON metadata, and data persistence is handled by traditional RDBMS.
+
+⸻
+
+1. Revised High-Level Architecture Diagram
+
+┌────────────────────────────┐
+│      Frontend (Lit)        │
+│                            │
+│ ┌───────────────────────┐  │
+│ │ Metadata Parser       │  │
+│ │ - Detect tabs         │  │
+│ │ - Determine layout    │  │
+│ └───────────────────────┘  │
+│         ↓       ↑          │
+│ ┌───────────────────────┐  │
+│ │ Dynamic Field/Table   │  │
+│ │ Renderer (Form/Table) │  │
+│ └───────────────────────┘  │
+│         ↓                  │
+│  Rendered Screen (DOM)     │
+└─────────┬─────────▲────────┘
+          │         │
+    Metadata JSON   │
+     (from API or   │
+       file)        │
+                    │
+          ┌─────────▼──────────────┐
+          │   Backend (Quarkus)    │
+          │                        │
+          │ ┌────────────────────┐ │
+          │ │ Metadata Provider  │ │
+          │ │ (JSON/File Based)  │ │  ← serves only metadata
+          │ └────────────────────┘ │
+          │ ┌────────────────────┐ │
+          │ │ Data Controller    │ │
+          │ │ - CRUD APIs        │ │
+          │ └────────────────────┘ │
+          │ ┌────────────────────┐ │
+          │ │ Services           │ │
+          │ │ - Transform, Logic │ │
+          │ └────────────────────┘ │
+          └──────────┬────────────┘
+                     │
+              Actual Business Data
+                Stored in PostgreSQL
+                (Structured Tables)
+
+
+
+⸻
+
+2. Key Clarification in Architecture
+
+Layer	Storage Format	Example
+Metadata	JSON (config file/API)	e.g., field names, types, labels
+Data	PostgreSQL Tables	e.g., rule, process, dropdown_reason
+
+	•	Metadata defines what to show and how.
+	•	Data is stored as structured columns in real tables, enabling:
+	•	Efficient querying
+	•	Indexing
+	•	Relational integrity
+
+⸻
+
+3. Backend Design Roles
+
+Metadata Provider
+	•	JSON files or static configuration APIs.
+	•	No need to store metadata in DB.
+	•	Easy to cache or version control.
+
+Data Controller
+	•	REST or GraphQL APIs.
+	•	Interfaces directly with relational tables.
+
+⸻
+
+4. Benefits of This Hybrid Design
+
+Benefit	Description
+Flexibility	Change UI structure by editing JSON only.
+Performance	Real data is stored in efficient SQL tables.
+Security	Roles and access can be implemented at API or table level.
+Maintainability	Frontend code is generic and doesn’t change per screen.
+
+
+
+⸻
+
+Would you like me to visualize this into:
+	•	Infographic (block diagram)?
+	•	A developer onboarding slide with use-case examples?
+	•	A README for your GitHub repo?
+
+Let me know how you’d like to use this!
+
+
+
