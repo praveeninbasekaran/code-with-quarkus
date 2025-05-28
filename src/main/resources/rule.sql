@@ -113,3 +113,146 @@ AFTER INSERT OR UPDATE OR DELETE
 ON drm_sit.rcsa_rule_management
 FOR EACH ROW
 EXECUTE FUNCTION drm_sit.trg_rule_management_audit_func();
+
+---
+
+
+----
+
+
+-- 1. Drop existing trigger and function if they exist (safety)
+DROP TRIGGER IF EXISTS trg_role_permission_audit ON drm_sit.rcsa_role_permission_config;
+DROP FUNCTION IF EXISTS drm_sit.trg_role_permission_audit_func();
+
+-- 2. Create trigger function for audit
+CREATE OR REPLACE FUNCTION drm_sit.trg_role_permission_audit_func()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        INSERT INTO drm_sit.rcsa_role_permission_config_audit (
+            permission_audit_id,
+            permission_id,
+            role_name,
+            add,
+            edit,
+            deactivate,
+            reactivate,
+            approve,
+            reject,
+            refer_back,
+            read_only,
+            created_by,
+            updated_by,
+            created_at,
+            updated_at,
+            action
+        )
+        VALUES (
+            nextval('drm_sit.seq_rcsa_role_permission_audit_id'),
+            NEW.permission_id,
+            NEW.role_name,
+            NEW.add,
+            NEW.edit,
+            NEW.deactivate,
+            NEW.reactivate,
+            NEW.approve,
+            NEW.reject,
+            NEW.refer_back,
+            NEW.read_only,
+            NEW.created_by,
+            NEW.updated_by,
+            NEW.created_at,
+            NEW.updated_at,
+            'add'
+        );
+        RETURN NEW;
+
+    ELSIF TG_OP = 'UPDATE' THEN
+        INSERT INTO drm_sit.rcsa_role_permission_config_audit (
+            permission_audit_id,
+            permission_id,
+            role_name,
+            add,
+            edit,
+            deactivate,
+            reactivate,
+            approve,
+            reject,
+            refer_back,
+            read_only,
+            created_by,
+            updated_by,
+            created_at,
+            updated_at,
+            action
+        )
+        VALUES (
+            nextval('drm_sit.seq_rcsa_role_permission_audit_id'),
+            NEW.permission_id,
+            NEW.role_name,
+            NEW.add,
+            NEW.edit,
+            NEW.deactivate,
+            NEW.reactivate,
+            NEW.approve,
+            NEW.reject,
+            NEW.refer_back,
+            NEW.read_only,
+            NEW.created_by,
+            NEW.updated_by,
+            NEW.created_at,
+            NEW.updated_at,
+            'edit'
+        );
+        RETURN NEW;
+
+    ELSIF TG_OP = 'DELETE' THEN
+        INSERT INTO drm_sit.rcsa_role_permission_config_audit (
+            permission_audit_id,
+            permission_id,
+            role_name,
+            add,
+            edit,
+            deactivate,
+            reactivate,
+            approve,
+            reject,
+            refer_back,
+            read_only,
+            created_by,
+            updated_by,
+            created_at,
+            updated_at,
+            action
+        )
+        VALUES (
+            nextval('drm_sit.seq_rcsa_role_permission_audit_id'),
+            OLD.permission_id,
+            OLD.role_name,
+            OLD.add,
+            OLD.edit,
+            OLD.deactivate,
+            OLD.reactivate,
+            OLD.approve,
+            OLD.reject,
+            OLD.refer_back,
+            OLD.read_only,
+            OLD.created_by,
+            OLD.updated_by,
+            OLD.created_at,
+            OLD.updated_at,
+            'delete'
+        );
+        RETURN OLD;
+    END IF;
+
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 3. Create the trigger on the main table
+CREATE TRIGGER trg_role_permission_audit
+AFTER INSERT OR UPDATE OR DELETE
+ON drm_sit.rcsa_role_permission_config
+FOR EACH ROW
+EXECUTE FUNCTION drm_sit.trg_role_permission_audit_func();
