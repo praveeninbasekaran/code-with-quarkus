@@ -487,3 +487,33 @@ AFTER INSERT OR UPDATE OR DELETE
 ON drm_sit.rcsa_rule_management
 FOR EACH ROW
 EXECUTE FUNCTION drm_sit.trg_rule_management_audit_func();
+
+
+
+-- Step 1: Create sequence for rcsa_rule_criteria primary key
+CREATE SEQUENCE rcsa_rule_criteria_id_seq
+    START WITH 1000001
+    INCREMENT BY 1
+    MINVALUE 1000001
+    NO MAXVALUE
+    CACHE 1;
+
+-- Step 2: Create table rcsa_rule_criteria
+CREATE TABLE rcsa_rule_criteria (
+    rule_criteria_id     BIGINT PRIMARY KEY DEFAULT nextval('rcsa_rule_criteria_id_seq'),
+    rule_id              BIGINT NOT NULL,
+    logical_operator     VARCHAR(10),        -- AND / OR
+    lhs_field            VARCHAR(255) NOT NULL,
+    mathematical_operator VARCHAR(10),       -- =, >, <, etc.
+    is_rhs_custom_value  BOOLEAN NOT NULL,
+    rhs_field            VARCHAR(255),
+    created_by           VARCHAR(100),
+    updated_by           VARCHAR(100),
+    created_date         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_date         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    -- Step 3: Foreign key to rcsa_rule_management
+    CONSTRAINT fk_rule_id FOREIGN KEY (rule_id)
+        REFERENCES rcsa_rule_management(rule_id)
+        ON DELETE CASCADE
+);
