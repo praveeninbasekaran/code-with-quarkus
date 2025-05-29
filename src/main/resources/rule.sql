@@ -256,3 +256,234 @@ AFTER INSERT OR UPDATE OR DELETE
 ON drm_sit.rcsa_role_permission_config
 FOR EACH ROW
 EXECUTE FUNCTION drm_sit.trg_role_permission_audit_func();
+
+
+---------
+---------
+---------
+
+-- 1. Drop old trigger and function (safety cleanup)
+DROP TRIGGER IF EXISTS trg_rule_management_audit
+    ON drm_sit.rcsa_rule_management;
+
+DROP FUNCTION IF EXISTS drm_sit.trg_rule_management_audit_func();
+
+-- 2. Create updated audit trigger function
+CREATE OR REPLACE FUNCTION drm_sit.trg_rule_management_audit_func()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        INSERT INTO drm_sit.rcsa_rule_management_audit (
+            rule_audit_id,
+            rule_id,
+            rule_status,
+            alert_generation_status,
+            rule_name,
+            rule_description,
+            risk_level_1,
+            risk_level_2,
+            risk_level_3,
+            country,
+            legal_entity,
+            business_function_l1,
+            business_function_l2,
+            business_function_l3,
+            process_id,
+            rule_entitlement_stage_1,
+            rule_entitlement_stage_2,
+            rule_entitlement_stage_3,
+            category_of_notification,
+            expected_risk_response_stage_1,
+            expected_risk_response_stage_2,
+            expected_risk_response_stage_3,
+            stage_due_in_days,
+            due_in_days,
+            email_template_alert_content,
+            comments,
+            action,
+            created_by,
+            updated_by,
+            created_date,
+            updated_date
+        ) VALUES (
+            nextval('drm_sit.seq_rule_audit_id'),
+            NEW.rule_id,
+            NEW.rule_status,
+            NEW.alert_generation_status,
+            NEW.rule_name,
+            NEW.rule_description,
+            NEW.risk_level_1,
+            NEW.risk_level_2,
+            NEW.risk_level_3,
+            NEW.country,
+            NEW.legal_entity,
+            NEW.business_function_l1,
+            NEW.business_function_l2,
+            NEW.business_function_l3,
+            NEW.process_id,
+            NEW.rule_entitlement_stage_1,
+            NEW.rule_entitlement_stage_2,
+            NEW.rule_entitlement_stage_3,
+            NEW.category_of_notification,
+            NEW.expected_risk_response_stage_1,
+            NEW.expected_risk_response_stage_2,
+            NEW.expected_risk_response_stage_3,
+            NEW.stage_due_in_days,
+            NEW.due_in_days,
+            NEW.email_template_alert_content,
+            NEW.comments,
+            'add',
+            NEW.created_by,
+            NEW.updated_by,
+            NEW.created_date,
+            NEW.updated_date
+        );
+        RETURN NEW;
+
+    ELSIF TG_OP = 'UPDATE' THEN
+        INSERT INTO drm_sit.rcsa_rule_management_audit (
+            rule_audit_id,
+            rule_id,
+            rule_status,
+            alert_generation_status,
+            rule_name,
+            rule_description,
+            risk_level_1,
+            risk_level_2,
+            risk_level_3,
+            country,
+            legal_entity,
+            business_function_l1,
+            business_function_l2,
+            business_function_l3,
+            process_id,
+            rule_entitlement_stage_1,
+            rule_entitlement_stage_2,
+            rule_entitlement_stage_3,
+            category_of_notification,
+            expected_risk_response_stage_1,
+            expected_risk_response_stage_2,
+            expected_risk_response_stage_3,
+            stage_due_in_days,
+            due_in_days,
+            email_template_alert_content,
+            comments,
+            action,
+            created_by,
+            updated_by,
+            created_date,
+            updated_date
+        ) VALUES (
+            nextval('drm_sit.seq_rule_audit_id'),
+            NEW.rule_id,
+            NEW.rule_status,
+            NEW.alert_generation_status,
+            NEW.rule_name,
+            NEW.rule_description,
+            NEW.risk_level_1,
+            NEW.risk_level_2,
+            NEW.risk_level_3,
+            NEW.country,
+            NEW.legal_entity,
+            NEW.business_function_l1,
+            NEW.business_function_l2,
+            NEW.business_function_l3,
+            NEW.process_id,
+            NEW.rule_entitlement_stage_1,
+            NEW.rule_entitlement_stage_2,
+            NEW.rule_entitlement_stage_3,
+            NEW.category_of_notification,
+            NEW.expected_risk_response_stage_1,
+            NEW.expected_risk_response_stage_2,
+            NEW.expected_risk_response_stage_3,
+            NEW.stage_due_in_days,
+            NEW.due_in_days,
+            NEW.email_template_alert_content,
+            NEW.comments,
+            'edit',
+            NEW.created_by,
+            NEW.updated_by,
+            NEW.created_date,
+            NEW.updated_date
+        );
+        RETURN NEW;
+
+    ELSIF TG_OP = 'DELETE' THEN
+        INSERT INTO drm_sit.rcsa_rule_management_audit (
+            rule_audit_id,
+            rule_id,
+            rule_status,
+            alert_generation_status,
+            rule_name,
+            rule_description,
+            risk_level_1,
+            risk_level_2,
+            risk_level_3,
+            country,
+            legal_entity,
+            business_function_l1,
+            business_function_l2,
+            business_function_l3,
+            process_id,
+            rule_entitlement_stage_1,
+            rule_entitlement_stage_2,
+            rule_entitlement_stage_3,
+            category_of_notification,
+            expected_risk_response_stage_1,
+            expected_risk_response_stage_2,
+            expected_risk_response_stage_3,
+            stage_due_in_days,
+            due_in_days,
+            email_template_alert_content,
+            comments,
+            action,
+            created_by,
+            updated_by,
+            created_date,
+            updated_date
+        ) VALUES (
+            nextval('drm_sit.seq_rule_audit_id'),
+            OLD.rule_id,
+            OLD.rule_status,
+            OLD.alert_generation_status,
+            OLD.rule_name,
+            OLD.rule_description,
+            OLD.risk_level_1,
+            OLD.risk_level_2,
+            OLD.risk_level_3,
+            OLD.country,
+            OLD.legal_entity,
+            OLD.business_function_l1,
+            OLD.business_function_l2,
+            OLD.business_function_l3,
+            OLD.process_id,
+            OLD.rule_entitlement_stage_1,
+            OLD.rule_entitlement_stage_2,
+            OLD.rule_entitlement_stage_3,
+            OLD.category_of_notification,
+            OLD.expected_risk_response_stage_1,
+            OLD.expected_risk_response_stage_2,
+            OLD.expected_risk_response_stage_3,
+            OLD.stage_due_in_days,
+            OLD.due_in_days,
+            OLD.email_template_alert_content,
+            OLD.comments,
+            'delete',
+            OLD.created_by,
+            OLD.updated_by,
+            OLD.created_date,
+            OLD.updated_date
+        );
+        RETURN OLD;
+    END IF;
+
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 3. Recreate the trigger
+CREATE TRIGGER trg_rule_management_audit
+AFTER INSERT OR UPDATE OR DELETE
+ON drm_sit.rcsa_rule_management
+FOR EACH ROW
+EXECUTE FUNCTION drm_sit.trg_rule_management_audit_func();
