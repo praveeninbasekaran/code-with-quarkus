@@ -1,0 +1,11 @@
+API Name	Description	Request Params	Response Sample
+GET /api/processes	Fetch all processes based on user role (country, legal entity, business function).	Derived from user session: role, country_id, legal_entity_id, business_funX_id	[{ processId, processName, totalRisk, totalControls, riskBreakdownInherent, riskBreakdownResidual }]
+GET /api/processes/{processId}/profile-view	Fetch risk details for a selected process (Profile View tab). Filtered by user role.	Path: processId; User context in session	[{ riskId, riskName, inherentRisk, controlEffectiveness, residualRisk, lastApprovedDate, rcsaStatus, ... }]
+GET /api/risk/{riskId}/ce-factors	Fetch Tableau CE Factors dashboard URL or embed data for popup.	Path: riskId	{ tableauUrl: string }
+POST /api/rcsa/adhoc-alert	Create a new ad-hoc RCSA alert for a process-risk combination.	Body: { processId, riskId, reason, comments, triggeredBy }	{ status: 'SUCCESS', message: 'Alert created' }
+GET /api/rcsa/adhoc-alerts/{processId}/{riskId}	Check if an ad-hoc alert already exists for a process-risk combo.	Path: processId, riskId	{ exists: true, createdAt, reason, comments }
+GET /api/processes/{processId}/copilot-rcsa	Load risk-level details for Co-pilot RCSA tab (issues, events, controls).	Path: processId	[{ riskId, inherentRisk, residualRisk, issues, events, rationale }]
+GET /api/processes/{processId}/metadata	Fetch metadata for a selected process (description, owner, business functions).	Path: processId	{ processId, description, owner, businessFunctions, legalEntity, inputs, outputs }
+GET /api/process-management	Fetch list of all processes for admin screen (with filter & pagination).	Query params: page, size, sort, search	[{ processId, processName, owner, status, functions }]
+POST /api/process-management	Create a new process metadata record (admin use).	Body: { processName, description, owner, businessFunctions, legalEntity }	{ status: 'CREATED', processId }
+PUT /api/process-management/{processId}	Update existing process metadata.	Path: processId, Body: updated process fields	{ status: 'UPDATED' }
