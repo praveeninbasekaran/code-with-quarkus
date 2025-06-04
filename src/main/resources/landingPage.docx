@@ -1,0 +1,149 @@
+Based on the complete set of user stories, screenshots, Figma flows, tables, and DB schemas you’ve shared, here is a comprehensive summary of the Dynamic Risk Monitoring – Process Risk Profile Module:
+
+⸻
+
+🧾 Page Name:
+
+Overall Risk Profile (Landing Page)
+
+⸻
+
+🎯 Objective:
+
+To enable users to monitor risk exposure per business process, assess control effectiveness, and drill into risk details or trigger further risk evaluations (e.g., Ad-hoc RCSA).
+
+⸻
+
+🗺️ Page Flow & Actions:
+
+✅ 1. Landing Page: Overall Risk Profile
+	•	View Type: Card view per process (e.g., Process One to Process Ten)
+	•	Widgets per card:
+	•	Total Risks
+	•	Total Controls
+	•	Inherent Risk donut chart
+	•	Residual Risk donut chart
+	•	Button: View Risk Details
+➜ Navigates to “Process Level or Risk Level Profile”
+
+⸻
+
+✅ 2. Process Level or Risk Level Profile
+	•	View Type: Tabbed – Profile View and Co-pilot RCSA
+
+🔷 Tab: Profile View
+	•	Table columns:
+	•	Organisation
+	•	Risk name & ID
+	•	Inherent Risk
+	•	Control Effectiveness (%)
+	•	Residual Risk
+	•	Last Approved Date (Residual)
+	•	Calculated Residual Risk at the time
+	•	#Controls
+	•	CE Factors (🔗 hyperlink → Tableau popup)
+	•	RCSA (🔗 hyperlink → Ad-hoc RCSA popup)
+	•	Cause L1
+	•	Cause L2
+
+🔸 Actions:
+	•	Click “Details” (CE Factors):
+	•	Opens popup showing Tableau embedded dashboard based on risk ID.
+	•	Click “Ad-hoc RCSA”:
+	•	Triggers popup → warns last performed date.
+	•	“Continue” → shows dropdown to select Reason (Regulatory, Environment, etc.) and Comment box.
+	•	“Proceed” → creates a new Ad-hoc alert record.
+
+⸻
+
+🔷 Tab: Co-pilot RCSA
+	•	Purpose: Shows detailed drilldown of selected risk:
+	•	Inherent Risk (rating + rationale + impact areas)
+	•	Control Effectiveness (rating + CST/KCI pass/fail)
+	•	Issues (open/closed, severity)
+	•	Events (high/medium/low)
+	•	Residual Risk (rating + rationale)
+
+⸻
+
+📥 Inbound Data Source (from UDL):
+
+Data is pulled from UDL (Unified Data Layer) and populated into internal database tables.
+
+🔽 UDL → Internal DB Tables:
+	•	Risk details
+	•	Risk ratings
+	•	Control metadata
+	•	Issue and event logs
+	•	Residual/inherent metrics
+	•	Historical approvals
+
+⸻
+
+📤 Outbound/Manually Created Data:
+
+💡 Manually created or system-generated (not from UDL):
+	•	Ad-hoc RCSA alerts (triggered by user)
+	•	Comments and reasons selected for RCSA
+	•	Potential user audit logs
+
+⸻
+
+📂 Tables Involved:
+
+🔷 1. drm_sit_rcsa_process_management (Internal Master Table)
+	•	Stores static process metadata
+	•	Populated via UDL
+	•	Fields include: process_id, name, description, owner, functions (L1–L3), legal entity, inputs, outputs, etc.
+
+⸻
+
+🔷 2. rcsa_process_profile_view (Derived/Joined View Table)
+	•	One record per risk under a process
+	•	Populated from UDL + enriched with RCSA and CE data
+	•	Used in Profile View tab
+
+⸻
+
+🔷 3. rcsa_adhoc_alerts (New Table – Custom Data)
+	•	Stores Ad-hoc RCSA alert triggers
+	•	Created manually via UI
+	•	Fields:
+	•	id, process_id, risk_id
+	•	reason, comments
+	•	triggered_by
+	•	created_at, status
+
+⸻
+
+🔷 4. (Optional) rcsa_ce_factor_log or CE Dashboard Source Table
+	•	If CE factors need logging or lookup for Tableau display
+	•	Can act as bridge table for Tableau embed context
+
+⸻
+
+📐 UX / Functional Logic Summary:
+
+Action	Trigger	Result
+Click View Risk Details	From landing page	Loads drilldown profile for selected process
+Click Details	CE Factors cell	Opens Tableau CE dashboard popup
+Click Ad-hoc RCSA	RCSA cell	Shows reason dropdown + comment → creates alert
+Expand “Risk One/Two”	In Co-pilot tab	Shows detailed breakdown of risks
+
+
+
+⸻
+
+📝 Recommendations:
+	•	Audit Trail: Add audit table to log user actions like RCSA trigger or CE drilldowns.
+	•	Alert Workflow Table: If RCSA alerts need approvals, a status-tracking table (rcsa_alert_workflow) can be used.
+	•	Process-Risk Mapping Table: Consider a normalized rcsa_process_risk_map(process_id, risk_id) for linking risks to processes.
+
+⸻
+
+Let me know if you’d like:
+	•	DDL scripts for rcsa_adhoc_alerts or view queries
+	•	API endpoint contracts (GET profile view, POST RCSA alert, etc.)
+	•	Suggested data flow diagram or ER diagram
+
+Ready to support next stage of build!
