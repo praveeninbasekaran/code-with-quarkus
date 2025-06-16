@@ -1,0 +1,151 @@
+Great, I’ve reviewed all the screenshots from the requirements document for the Alert Dashboard module. Here’s a consolidated, end-to-end summary covering all screens, backend logic, UI requirements, user roles, actions, workflow, and advanced features. This will help align your tech design and backlog.
+
+⸻
+
+ALERT DASHBOARD CONSOLIDATED REQUIREMENTS
+
+1. High-Level Overview
+	•	Alert Dashboard is accessible under “My Risk Profile” in the UI left pane.
+	•	Displays all alerts in a dynamic, filterable table.
+	•	Data source: UDL + Rule Management Library (for alert generation, risk, process, ratings, etc.).
+
+⸻
+
+2. Dashboard Table Columns & Data
+
+S.No	Column Name	Description/Business Rule
+1	Alert ID	Unique, hyperlinked to action screen.
+2	Alert Date	First generated date, user time zone.
+3	Type of Alert	Rating/Indicator/Adhoc RCSA (from rules).
+4	Process Name	Process Name + Process ID.
+5	Risk Name	Risk Name + Risk ID.
+6	Inherent Risk	Latest IR rating from UDL.
+7	Control Effectiveness	Latest CE rating from UDL.
+8	Previous RR	First approved RR (from UDL/DRM).
+9	Calculated RR	RR from microservice at generation time.
+10	Latest RR	Latest RR from UDL.
+11	Assigned Role	Current role responsible (from UDL or SB workflow).
+12	Assigned To	User name + Bank ID currently assigned.
+13	Status	Open, In Progress, Closed, Overdue, Cancelled, Pending Cancellation, Resolved.
+14	Due Date	Calculated from Rule Management config.
+15	Actions	Contextual: Assign, Assign to Me, Reassign, Cancel, Approve/Reject Cancellation.
+
+
+⸻
+
+3. Action Buttons & Logic
+
+Individual Actions
+	•	Assign: Always enabled for Admin; enabled for others when Assigned To is blank; user must have eligible role.
+	•	Assign to Me: Enabled if Assigned To is blank and user is in assigned role; enforces role/parameter match.
+	•	Reassign: Visible if multiple eligible roles; enabled if Assigned To is blank or current user; pop-up to select role, comments mandatory.
+	•	Cancel: Stage 1 only, and if Assigned To is blank/current user; moves alert to Pending Cancellation.
+	•	Approve/Reject Cancellation: For eligible roles only, based on alert status and user role.
+
+Bulk Actions (when filter is ‘Assigned to My Role’ and 2+ alerts are selected):
+	•	Assign All: Assigns selected alerts to chosen eligible user.
+	•	Assign All to Me: Assigns all eligible selected alerts to self.
+	•	Cancel All: Moves all selected to Pending Cancellation; warning and mandatory comments enforced.
+
+All actions require a comments pop-up.
+	•	On Proceed, update Assigned To/Status, and create Alert History entry capturing:
+	•	Stage, User Role, User Name, Action, Assigned To, Assigned To (User Role/Name), Action Date, Comments.
+
+⸻
+
+4. Alert Statuses (Lifecycle)
+	•	Open: Default at creation.
+	•	In Progress: On any Assign/Assign to Me/Assign All/Reassign.
+	•	Closed: Workflow end.
+	•	Overdue: Due date passed, status is still In Progress/Open.
+	•	Pending Cancellation: Awaiting approval.
+	•	Cancelled: Approved cancellation (end state).
+	•	Resolved: Similar to closed; workflow complete, no further changes.
+
+⸻
+
+5. UI Features
+	•	Top-Right Icons:
+	1.	Expand (fullscreen table)
+	2.	Clear Filter (enabled only when filters applied)
+	3.	Hide/Show Columns (customize columns, select all, save/cancel, persistent)
+	4.	Export (Excel download, applies current filter; saves to local)
+	•	My Notifications Dropdown:
+	•	All: All alerts in top filter.
+	•	New Alerts: Alerts assigned since last login.
+	•	Reminder 1/2: Alerts matching reminder conditions (with respective user/role/status).
+	•	Overdue: Alerts with status Overdue.
+	•	Filtering:
+	•	Top filters: All, Assigned to current role, Assigned to me, Relevant alerts
+	•	Each filter has role/parameter matching logic (fine grain, as per tables).
+	•	All filters are dynamically applied and persist across actions.
+
+⸻
+
+6. Role-Parameter Mapping
+	•	Tables map user roles (Framework Owner, Business Function, Specialist, Owner, etc.) to alert parameters (risk, process, function, legal entity, country, bank ID).
+	•	Special roles (Admin, Group/Process Owner) have specific landing page or user list logic.
+
+⸻
+
+7. Bulk Actions & Constraints
+	•	Only available under Assigned to My Role filter.
+	•	Bulk Assign/Assign to Me/Cancel All are shown at table top when 2+ alerts are selected.
+	•	All pop-ups require comments and drop-downs for users (as per fine-grained access).
+	•	Admin can always assign; Assign to Me always disabled for Admin.
+
+⸻
+
+8. Audit/History
+	•	Every action (assign, reassign, cancel, bulk) is logged in Alert History with:
+	•	Stage, User Role, User Name (with Bank ID), Action, Assigned To (User/Role/Name), Date, Comments.
+
+⸻
+
+9. Notifications
+	•	Daily job: Checks unassigned alerts and matches with users who get access to DRM later; assigns eligible alerts and sends notification.
+
+⸻
+
+10. Miscellaneous
+	•	Assigned To: Always shown as Name + Bank ID.
+	•	Mandatory Comments: Required for all assignment, reassign, cancel, and bulk actions.
+	•	Uneditable after Pending Cancellation.
+	•	Approval logic for cancellation varies by role:
+	•	BRM cancels > Group/Country Process Owner must approve.
+	•	Group/Country Process Owner cancels > direct cancel.
+	•	MS Specialist cancels > other MS Specialists approve.
+
+⸻
+
+Key Takeaways/Action Items for Implementation
+	•	Backend Service Layer:
+	•	Support for dynamic filtering, notifications, and fine-grained role-parameter mapping.
+	•	Endpoints for all actions (individual + bulk) with audit history.
+	•	Batch update logic for bulk actions.
+	•	Export endpoint to provide filtered data as Excel.
+	•	Scheduled job for late DRM access notifications.
+	•	UI Layer:
+	•	Dynamic, customizable table (columns/filters).
+	•	Contextual, role-driven action buttons.
+	•	Bulk action toolbar and pop-ups with enforced mandatory fields.
+	•	Column selector and persistent user preferences.
+	•	Notification dropdown with auto-refresh.
+	•	Download/export with applied filters.
+	•	Database Layer:
+	•	Ensure Alert, History, and User/Role mapping tables can store all required audit data.
+	•	Support for new status values and assignment logic.
+
+⸻
+
+If you need a side-by-side “old vs new” mapping, or a suggested backend contract (DTO/API), let me know!
+If you want to focus on backend or frontend implementation next, tell me your priority.
+
+⸻
+
+Ready for your next step:
+	•	Want to start with backend API contracts for these actions?
+	•	Need table/entity design suggestions?
+	•	Want a sample UI wireframe/workflow?
+
+Let me know what to do first!
