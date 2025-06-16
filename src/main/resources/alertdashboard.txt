@@ -149,3 +149,31 @@ Ready for your next step:
 	•	Want a sample UI wireframe/workflow?
 
 Let me know what to do first!
+
+-- For rcsa_alert_management
+ALTER TABLE drm_sit.rcsa_alert_management
+ADD COLUMN stage character varying(50);
+
+-- For rcsa_adhoc_alerts
+ALTER TABLE drm_sit.rcsa_adhoc_alerts
+ADD COLUMN stage character varying(50);
+ADD COLUMN assigned_role character varying(100);
+ADD COLUMN assigned_to character varying(255);
+ADD COLUMN status character varying(50);  -- If not already present
+ADD COLUMN due_date timestamp without time zone;
+ALTER TABLE drm_sit.rcsa_adhoc_alerts
+RENAME COLUMN updatedby TO updated_by;
+
+CREATE TABLE IF NOT EXISTS drm_sit.rcsa_alert_action_history (
+    id bigserial PRIMARY KEY,
+    alert_id bigint NOT NULL,
+    action character varying(50), -- e.g., assign, reassign, approve, reject, cancel, refer-back, etc.
+    stage character varying(50),
+    assigned_role character varying(100),
+    assigned_to character varying(255),
+    action_by character varying(255),
+    action_by_role character varying(100),
+    action_timestamp timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    comments text
+);
+
