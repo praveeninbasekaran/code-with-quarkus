@@ -38,3 +38,60 @@ LEFT JOIN drm_sit.rcsa_user_roles ur
 
 -- No WHERE clause: "All" filter = every alert in system
 ;
+
+-- Drop old table if exists
+DROP TABLE IF EXISTS drm_sit.rcsa_alert_management;
+
+-- Create the new table as per the final spec
+CREATE TABLE drm_sit.rcsa_alert_management (
+    alert_id bigint NOT NULL,
+    rule_id bigint NOT NULL,
+    rule_version integer,
+
+    l1_risk_id character varying(255),
+    l2_risk_id character varying(255),
+    l3_risk_id character varying(255),
+
+    business_function_l1_id character varying(255),
+    business_function_l2_id character varying(255),
+    business_function_l3_id character varying(255),
+
+    country character varying(255),
+    legal_entity character varying(255),
+    stage character varying(50),
+
+    alert_date timestamp without time zone NOT NULL,
+    type_of_alert character varying(50),
+    rule_name character varying(255),
+    process_name character varying(255),
+    risk_name character varying(255),
+
+    inherent_risk_rating character varying(100),
+    control_effectiveness character varying(100),
+    previous_risk_rating character varying(100),
+    calculated_risk_rating character varying(100),
+    latest_risk_rating character varying(100),
+    proposed_rr character varying(100),
+
+    assigned_role character varying(100),
+    assigned_to character varying(255),
+    alert_status character varying(50),
+    due_date timestamp without time zone,
+
+    created_date timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_date timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_by character varying(50),
+
+    last_action_taken character varying(50),
+    last_action_date timestamp without time zone,
+    latest_reminder_date timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    escalation_date timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    atom_case_id character varying(100),
+
+    CONSTRAINT rcsa_alert_management_pkey PRIMARY KEY (alert_id),
+    CONSTRAINT fk_rule_id FOREIGN KEY (rule_id)
+        REFERENCES drm_sit.rcsa_rule_management(rule_id)
+);
+
+ALTER TABLE drm_sit.rcsa_alert_management
+    OWNER TO svc_riskview;
