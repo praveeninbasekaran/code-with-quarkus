@@ -95,3 +95,50 @@ CREATE TABLE drm_sit.rcsa_alert_management (
 
 ALTER TABLE drm_sit.rcsa_alert_management
     OWNER TO svc_riskview;
+
+
+---------
+
+--all
+CREATE OR REPLACE VIEW vw_rcsa_alert_dashboard_all AS
+SELECT
+    am.alert_id,
+    am.rule_id,
+    rm.rule_version,
+    am.l1_risk_id,
+    am.l2_risk_id,
+    am.l3_risk_id,
+    am.business_function_l1_id,
+    am.business_function_l2_id,
+    am.business_function_l3_id,
+    am.country,
+    am.legal_entity,
+    am.stage,
+    am.alert_date,
+    am.type_of_alert,
+    am.rule_name,
+    am.process_name,
+    am.risk_name,
+    am.inherent_risk_rating AS latest_ir,
+    am.control_effectiveness AS latest_ce,
+    am.previous_risk_rating AS previous_rr,
+    am.proposed_rr,
+    am.assigned_role,
+    am.assigned_to,
+    am.alert_status,
+    am.due_date,
+    am.created_date,
+    am.updated_date,
+    am.updated_by,
+    am.last_action_taken,
+    am.last_action_date,
+    am.latest_reminder_date,
+    am.escalation_date,
+    am.atom_case_id
+FROM
+    drm_sit.rcsa_alert_management am
+LEFT JOIN
+    drm_sit.rcsa_rule_management rm
+ON
+    am.rule_id = rm.rule_id;
+
