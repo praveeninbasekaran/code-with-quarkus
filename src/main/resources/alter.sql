@@ -1,0 +1,16 @@
+ALTER TABLE sb_55313_116.drm.rcsa_udl_process_management
+ALTER COLUMN process_name TYPE character varying(255),
+ALTER COLUMN process_owner TYPE character varying(255),
+ALTER COLUMN business_function_l1 TYPE character varying(255),
+ALTER COLUMN business_function_l2 TYPE character varying(255),
+ALTER COLUMN business_function_l3 TYPE character varying(255),
+ALTER COLUMN country TYPE character varying(255),
+ALTER COLUMN legal_entity TYPE character varying(255),
+ALTER COLUMN created_by TYPE character varying(50),
+ALTER COLUMN modified_by TYPE character varying(50),
+ALTER COLUMN status TYPE character varying(50),
+ALTER COLUMN business_function_l1_id TYPE character varying(255),
+ALTER COLUMN business_function_l2_id TYPE character varying(255),
+ALTER COLUMN business_function_l3_id TYPE character varying(255),
+ALTER COLUMN legal_entity_id TYPE character varying(50),
+ALTER COLUMN country_id TYPE character varying(50);
